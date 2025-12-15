@@ -1,0 +1,31 @@
+{
+  "name": "student-grading-system",
+  "version": "1.0.0",
+  "description": "Student Grading System",
+  "main": "public/Sample.html",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "server": "node src/Server.js",
+    "start": "node src/Server.js"
+  },
+  "keywords": [
+    "student",
+    "grading",
+    "system"
+  ],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "vite": "^7.0.4"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "express-session": "^1.17.3",
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
+    "body-parser": "^1.20.2",
+    "mysql2": "^3.6.5"
+  }
+}

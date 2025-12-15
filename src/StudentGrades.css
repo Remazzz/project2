@@ -1,0 +1,614 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:root {
+  --bg-primary: transparent;
+  --bg-secondary: rgba(255, 255, 255, 0.92);
+  --bg-tertiary: rgba(248, 250, 252, 0.95);
+  --text-primary: #1e293b;
+  --text-secondary: #64748b;
+  --border-color: rgba(226, 232, 240, 0.5);
+  --shadow: rgba(0, 0, 0, 0.08);
+  --accent-blue: #3b82f6;
+  --accent-green: #10b981;
+  --accent-red: #ef4444;
+  --toggle-bg: #475569;
+  --toggle-thumb: #ffffff;
+  --input-bg: rgba(255, 255, 255, 0.95);
+}
+
+[data-theme="dark"] {
+  --bg-primary: #0f172a;
+  --bg-secondary: #1e293b;
+  --bg-tertiary: #334155;
+  --text-primary: #f1f5f9;
+  --text-secondary: #94a3b8;
+  --border-color: #334155;
+  --shadow: rgba(0, 0, 0, 0.3);
+  --accent-blue: #60a5fa;
+  --accent-green: #34d399;
+  --accent-red: #f87171;
+  --toggle-bg: #cbd5e1;
+  --toggle-thumb: #1e293b;
+  --input-bg: #334155;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+  background: linear-gradient(135deg, rgba(30, 41, 59, 0.95) 0%, rgba(15, 23, 42, 0.98) 100%), url('../public/Background.jpg') center/cover no-repeat fixed;
+  background-attachment: fixed;
+  color: var(--text-primary);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+[data-theme="dark"] body {
+  background: linear-gradient(135deg, rgba(15, 23, 42, 0.97) 0%, rgba(2, 6, 23, 0.99) 100%), url('../public/Background.jpg') center/cover no-repeat fixed;
+}
+
+.page-container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.page-header {
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(10px);
+  padding: 1.5rem 3rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  transition: background-color 0.3s ease;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+[data-theme="dark"] .page-header {
+  background: rgba(30, 41, 59, 0.85);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.header-left {
+  flex: 0 0 auto;
+}
+
+.school-logo {
+  height: 50px;
+  width: 50px;
+  object-fit: contain;
+  border-radius: 50%;
+}
+
+.header-center {
+  flex: 1;
+  text-align: center;
+}
+
+.page-title {
+  font-size: 2rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0;
+  letter-spacing: -0.5px;
+}
+
+.header-right {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.theme-toggle {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+}
+
+.toggle-track {
+  display: block;
+  width: 60px;
+  height: 32px;
+  background: var(--toggle-bg);
+  border-radius: 16px;
+  position: relative;
+  transition: background-color 0.3s ease;
+}
+
+.toggle-thumb {
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  width: 24px;
+  height: 24px;
+  background: var(--toggle-thumb);
+  border-radius: 50%;
+  transition: transform 0.3s ease, background-color 0.3s ease;
+}
+
+[data-theme="dark"] .toggle-thumb {
+  transform: translateX(28px);
+}
+
+.btn-logout {
+  padding: 0.5rem 1.25rem;
+  background: #ef4444;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.btn-logout:hover {
+  background: #dc2626;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+}
+
+.btn-logout:active {
+  transform: translateY(0);
+}
+
+.btn-back {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1.25rem;
+  background: var(--accent-blue);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  text-decoration: none;
+}
+
+.btn-back:hover {
+  background: #2563eb;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+.btn-back:active {
+  transform: translateY(0);
+}
+
+.btn-back svg {
+  stroke: currentColor;
+}
+
+.main-content {
+  flex: 1;
+  padding: 2rem 3rem;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+.report-container {
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(15px);
+  border-radius: 20px;
+  padding: 2.5rem;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  width: 100%;
+  max-width: 1000px;
+}
+
+[data-theme="dark"] .report-container {
+  background: rgba(30, 41, 59, 0.88);
+  backdrop-filter: blur(15px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+.report-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  gap: 2rem;
+}
+
+.student-info-card {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  flex: 1;
+}
+
+.student-avatar-large {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent-blue), #60a5fa);
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 2rem;
+  font-weight: 600;
+}
+
+.student-details h2,
+.student-details p {
+  margin: 0;
+  line-height: 1.4;
+}
+
+.student-name {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 0.25rem;
+}
+
+.student-id,
+.student-section {
+  font-size: 0.95rem;
+  color: var(--text-secondary);
+}
+
+.student-id {
+  margin-bottom: 0.25rem;
+}
+
+.btn-download {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  background: var(--text-primary);
+  color: rgb(61, 118, 0);
+  border: none;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.btn-download:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.btn-download:active {
+  transform: translateY(0);
+}
+
+.btn-download svg {
+  stroke: currentColor;
+}
+
+.student-selector {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.selector-label {
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: var(--text-primary);
+  white-space: nowrap;
+}
+
+.student-select {
+  flex: 1;
+  max-width: 300px;
+  padding: 0.75rem 1rem;
+  border: 2px solid var(--border-color);
+  border-radius: 10px;
+  font-size: 0.9rem;
+  background: var(--input-bg);
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.student-select:focus {
+  outline: none;
+  border-color: var(--accent-blue);
+}
+
+.grades-table-wrapper {
+  overflow-x: auto;
+}
+
+.grades-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 1rem;
+}
+
+.grades-table thead {
+  background: var(--bg-tertiary);
+}
+
+.grades-table th {
+  padding: 1rem;
+  text-align: left;
+  font-weight: 600;
+  color: var(--text-primary);
+  font-size: 0.95rem;
+  border-bottom: 2px solid var(--border-color);
+}
+
+.grades-table td {
+  padding: 1rem;
+  border-bottom: 1px solid var(--border-color);
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+}
+
+.grades-table tbody tr:hover {
+  background: var(--bg-tertiary);
+}
+
+.subject-name {
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.grade-letter {
+  font-weight: 600;
+  color: var(--accent-blue);
+  font-size: 1rem;
+}
+
+.score-value {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 0.4rem 0.75rem;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-align: center;
+  min-width: 80px;
+}
+
+.status-passed {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+[data-theme="dark"] .status-passed {
+  background: rgba(16, 185, 129, 0.2);
+  color: #86efac;
+}
+
+.status-failed {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+[data-theme="dark"] .status-failed {
+  background: rgba(239, 68, 68, 0.2);
+  color: #fca5a5;
+}
+
+.no-data-message {
+  text-align: center;
+  padding: 2rem;
+  color: var(--text-secondary);
+  font-size: 1rem;
+}
+
+.grade-details {
+  background: var(--bg-tertiary);
+  border-radius: 10px;
+  padding: 1rem;
+  margin-top: 1rem;
+}
+
+.details-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1rem;
+}
+
+.detail-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.detail-label {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+}
+
+.detail-value {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+@media (max-width: 1024px) {
+  .main-content {
+    padding: 1.5rem 2rem;
+  }
+
+  .report-container {
+    padding: 1.5rem;
+  }
+
+  .page-header {
+    padding: 1.25rem 2rem;
+  }
+
+  .page-title {
+    font-size: 1.5rem;
+  }
+
+  .report-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .btn-download {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 768px) {
+  .page-header {
+    padding: 1rem 1.5rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  .page-title {
+    font-size: 1.25rem;
+    flex: 0 0 100%;
+    order: 2;
+  }
+
+  .header-left {
+    order: 1;
+  }
+
+  .header-right {
+    order: 3;
+  }
+
+  .main-content {
+    padding: 1rem;
+  }
+
+  .report-container {
+    padding: 1.25rem;
+  }
+
+  .student-info-card {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .student-avatar-large {
+    width: 70px;
+    height: 70px;
+  }
+
+  .student-name {
+    font-size: 1.25rem;
+  }
+
+  .student-selector {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .student-select {
+    max-width: 100%;
+  }
+
+  .grades-table th,
+  .grades-table td {
+    padding: 0.75rem 0.5rem;
+    font-size: 0.85rem;
+  }
+
+  .details-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 480px) {
+  .page-header {
+    padding: 1rem;
+  }
+
+  .school-logo {
+    height: 40px;
+    width: 40px;
+  }
+
+  .page-title {
+    font-size: 1rem;
+  }
+
+  .toggle-track {
+    width: 50px;
+    height: 28px;
+  }
+
+  .toggle-thumb {
+    width: 20px;
+    height: 20px;
+  }
+
+  [data-theme="dark"] .toggle-thumb {
+    transform: translateX(22px);
+  }
+
+  .btn-logout {
+    padding: 0.4rem 1rem;
+    font-size: 0.85rem;
+  }
+
+  .report-container {
+    padding: 1rem;
+  }
+
+  .report-header {
+    gap: 1rem;
+  }
+
+  .student-avatar-large {
+    width: 60px;
+    height: 60px;
+  }
+
+  .student-name {
+    font-size: 1rem;
+  }
+
+  .student-id,
+  .student-section {
+    font-size: 0.85rem;
+  }
+
+  .grades-table th,
+  .grades-table td {
+    padding: 0.5rem 0.25rem;
+    font-size: 0.75rem;
+  }
+
+  .details-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .status-badge {
+    padding: 0.3rem 0.5rem;
+    font-size: 0.7rem;
+  }
+}

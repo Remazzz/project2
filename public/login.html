@@ -1,0 +1,234 @@
+  <!DOCTYPE html>
+  <html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Student Grading System</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+  
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+        background: linear-gradient(135deg, rgba(30, 41, 59, 0.95) 0%, rgba(15, 23, 42, 0.98) 100%), url('/public/Background.jpg') center/cover no-repeat fixed;
+        background-attachment: fixed;
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+      }
+  
+      .login-container {
+        background: rgba(255, 255, 255, 0.92);
+        backdrop-filter: blur(15px);
+        padding: 40px;
+        border-radius: 20px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+        width: 100%;
+        max-width: 400px;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+      }
+  
+      .logo-container {
+        text-align: center;
+        margin-bottom: 30px;
+      }
+  
+      .logo {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        margin-bottom: 15px;
+      }
+  
+      h1 {
+        font-size: 2rem;
+        color: #333;
+        margin-bottom: 10px;
+        text-align: center;
+      }
+  
+      .subtitle {
+        color: #666;
+        text-align: center;
+        margin-bottom: 30px;
+        font-size: 0.95rem;
+      }
+  
+      .form-group {
+        margin-bottom: 20px;
+      }
+  
+      label {
+        display: block;
+        margin-bottom: 8px;
+        color: #333;
+        font-weight: 500;
+        font-size: 0.95rem;
+      }
+  
+      input {
+        width: 100%;
+        padding: 12px 15px;
+        border: 2px solid #e0e0e0;
+        border-radius: 10px;
+        font-size: 1rem;
+        transition: border-color 0.3s ease;
+      }
+  
+      input:focus {
+        outline: none;
+        border-color: #667eea;
+      }
+  
+      .btn-login {
+        width: 100%;
+        padding: 14px;
+        background: linear-gradient(135deg, #800000 0%, #6A0D0D 100%);
+        color: white;
+        border: none;
+        border-radius: 10px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        margin-top: 10px;
+      }
+  
+      .btn-login:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 20px rgba(182, 110, 111, 0.4);
+      }
+  
+      .btn-login:active {
+        transform: translateY(0);
+      }
+  
+      .register-link {
+        text-align: center;
+        margin-top: 20px;
+        color: #666;
+        font-size: 0.95rem;
+      }
+  
+      .register-link a {
+        color: #667eea;
+        text-decoration: none;
+        font-weight: 600;
+      }
+  
+      .register-link a:hover {
+        text-decoration: underline;
+      }
+  
+      .error-message {
+        background: #fee;
+        color: #c33;
+        padding: 12px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        font-size: 0.9rem;
+        display: none;
+      }
+  
+      .success-message {
+        background: #efe;
+        color: #3c3;
+        padding: 12px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        font-size: 0.9rem;
+        display: none;
+      }
+  
+      .loading {
+        opacity: 0.6;
+        pointer-events: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="login-container">
+      <div class="logo-container">
+        <img src="/public/Logo.jpg" alt="School Logo" class="logo">
+        <h1>Welcome Back</h1>
+        <p class="subtitle">Login to Student Grading System</p>
+      </div>
+  
+      <div class="error-message" id="errorMessage"></div>
+      <div class="success-message" id="successMessage"></div>
+  
+      <form id="loginForm">
+        <div class="form-group">
+          <label for="username">Username</label>
+          <input type="text" id="username" name="username" required autocomplete="username">
+        </div>
+  
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input type="password" id="password" name="password" required autocomplete="current-password">
+        </div>
+  
+        <button type="submit" class="btn-login">Login</button>
+      </form>
+  
+      <div class="register-link">
+        Don't have an account? <a href="register.html">Register here</a>
+      </div>
+    </div>
+  
+    <script>
+      const loginForm = document.getElementById('loginForm');
+      const errorMessage = document.getElementById('errorMessage');
+      const successMessage = document.getElementById('successMessage');
+
+      loginForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const username = document.getElementById('username').value;
+        const password = document.getElementById('password').value;
+
+        errorMessage.style.display = 'none';
+        successMessage.style.display = 'none';
+
+        loginForm.classList.add('loading');
+
+        try {
+          const response = await fetch('/api/login', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ username, password })
+          });
+
+          const data = await response.json();
+
+          if (data.success) {
+            successMessage.textContent = 'Login successful! Redirecting...';
+            successMessage.style.display = 'block';
+            setTimeout(() => {
+              if (data.user.role === 'admin') {
+                window.location.href = '/student-grades.html';
+              } else {
+                window.location.href = '/Sample.html';
+              }
+            }, 1000);
+          } else {
+            errorMessage.textContent = data.message || 'Login failed. Please check your credentials.';
+            errorMessage.style.display = 'block';
+            loginForm.classList.remove('loading');
+          }
+        } catch (error) {
+          errorMessage.textContent = 'An error occurred. Please try again.';
+          errorMessage.style.display = 'block';
+          loginForm.classList.remove('loading');
+        }
+      });
+    </script>
+  </body>
+  </html>

@@ -1,0 +1,26 @@
+{
+  "name": "sample-project",
+  "version": "1.0.0",
+  "main": "Sample.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "vite",
+    "server": "node server/server.js",
+    "start": "node server/server.js",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "Sample Student Grading System",
+  "devDependencies": {
+    "vite": "^7.0.4"
+  },
+  "dependencies": {
+    "body-parser": "^2.2.0",
+    "cors": "^2.8.5",
+    "express": "^5.1.0",
+    "mysql2": "^3.15.0"
+  }
+}

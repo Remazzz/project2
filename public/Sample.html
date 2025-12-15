@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Student Grading System</title>
+  <link rel="stylesheet" href="../src/Sample.css">
+  <style>
+    body {
+      background: linear-gradient(135deg, rgba(30, 41, 59, 0.95) 0%, rgba(15, 23, 42, 0.98) 100%), url('/public/Background.jpg') center/cover no-repeat fixed;
+      background-attachment: fixed;
+    }
+  </style>
+</head>
+<body>
+  <div class="app-container">
+    <header class="app-header">
+      <div class="header-left">
+        <img src="/public/Logo.jpg" alt="School Logo" class="school-logo">
+      </div>
+      <div class="header-center">
+        <h1 class="app-title">Student Grading System</h1>
+      </div>
+      <div class="header-right">
+        <a href="/public/student-grades.html" class="btn-view-grades">View Grades</a>
+        <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode">
+          <span class="toggle-track">
+            <span class="toggle-thumb"></span>
+          </span>
+        </button>
+        <button class="btn-logout" id="logoutBtn">
+          Logout
+        </button>
+      </div>
+    </header>
+
+    <main class="main-content">
+      <aside class="sidebar">
+        <div class="sidebar-header">
+          <h2 class="sidebar-title">Students</h2>
+        </div>
+
+        <div class="section-controls">
+          <select id="sectionSelect" class="section-select">
+            <option value="">Select Section</option>
+          </select>
+          <div class="action-buttons">
+            <button type="button" class="btn-icon" id="addSectionBtn" title="Add Section">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                <path d="M8 3v10M3 8h10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+              </svg>
+            </button>
+            <button type="button" class="btn-icon" id="addStudentBtn" title="Add Student">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                <path d="M8 7a2.5 2.5 0 100-5 2.5 2.5 0 000 5zM13 14a5 5 0 00-10 0" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                <path d="M12 4v4M14 6h-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="subjects-section">
+          <div class="subjects-header">
+            <h3 class="subjects-title">Subjects</h3>
+            <button type="button" class="btn-icon-small" id="addSubjectBtn" title="Add Subject">
+              <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+                <path d="M8 3v10M3 8h10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+              </svg>
+            </button>
+          </div>
+          <ul class="subjects-list" id="subjectsList">
+          </ul>
+        </div>
+
+        <div class="search-container">
+          <svg class="search-icon" width="20" height="20" viewBox="0 0 20 20" fill="none">
+            <path d="M9 17A8 8 0 1 0 9 1a8 8 0 0 0 0 16zM18 18l-4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <input type="text" class="search-input" id="searchInput" placeholder="Search students...">
+        </div>
+
+        <ul class="students-list" id="studentsList">
+        </ul>
+      </aside>
+
+      <section class="content-area">
+        <div class="content-header">
+          <div>
+            <h2 class="content-title">Student Information</h2>
+            <div class="selected-student-info" id="selectedStudentInfo">No student selected</div>
+          </div>
+          <div class="subject-selector-wrapper">
+            <label for="subjectSelect" class="subject-selector-label">Subject:</label>
+            <select id="subjectSelect" class="subject-select">
+              <option value="">Select Subject</option>
+            </select>
+          </div>
+        </div>
+
+        <form id="gradingForm" class="grading-form">
+          <input type="hidden" id="studentId" name="student_id" value="">
+
+          <div class="form-section-header">
+            <h3 class="section-title">Attendance & Participation</h3>
+          </div>
+
+          <div class="form-row">
+            <div class="form-field">
+              <label for="classParticipation" class="form-label">Class Participation (%)</label>
+              <input
+                type="number"
+                id="classParticipation"
+                name="class_participation"
+                class="form-input"
+                placeholder="0-100"
+                min="0"
+                max="100"
+                step="0.01"
+              >
+            </div>
+
+            <div class="form-field">
+              <label for="attendance" class="form-label">Attendance (%)</label>
+              <input
+                type="number"
+                id="attendance"
+                name="attendance"
+                class="form-input"
+                placeholder="0-100"
+                min="0"
+                max="100"
+                step="0.01"
+              >
+            </div>
+          </div>
+
+          <div class="form-section-header">
+            <h3 class="section-title">Quizzes</h3>
+          </div>
+
+          <div class="form-row">
+            <div class="score-pair">
+              <label class="form-label">Quiz 1</label>
+              <div class="score-inputs">
+                <div class="score-input-group">
+                  <label class="score-label">Score</label>
+                  <input
+                    type="number"
+                    id="quiz1Score"
+                    name="quiz1_score"
+                    class="form-input score-field"
+                    placeholder="0"
+                    min="0"
+                    step="0.01"
+                  >
+                </div>
+                <span class="score-divider">/</span>
+                <div class="score-input-group">
+                  <label class="score-label">Total</label>
+                  <input
+                    type="number"
+                    id="quiz1Total"
+                    name="quiz1_total"
+                    class="form-input total-field"
+                    placeholder="100"
+                    min="0.01"
+                    step="0.01"
+                    value="100"
+                  >
+                </div>
+              </div>
+            </div>
+
+            <div class="score-pair">
+              <label class="form-label">Quiz 2</label>
+              <div class="score-inputs">
+                <div class="score-input-group">
+                  <label class="score-label">Score</label>
+                  <input
+                    type="number"
+                    id="quiz2Score"
+                    name="quiz2_score"
+                    class="form-input score-field"
+                    placeholder="0"
+                    min="0"
+                    step="0.01"
+                  >
+                </div>
+                <span class="score-divider">/</span>
+                <div class="score-input-group">
+                  <label class="score-label">Total</label>
+                  <input
+                    type="number"
+                    id="quiz2Total"
+                    name="quiz2_total"
+                    class="form-input total-field"
+                    placeholder="100"
+                    min="0.01"
+                    step="0.01"
+                    value="100"
+                  >
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-section-header">
+            <h3 class="section-title">Exams & Laboratory</h3>
+          </div>
+
+          <div class="form-row">
+            <div class="score-pair">
+              <label class="form-label">Final Exam</label>
+              <div class="score-inputs">
+                <div class="score-input-group">
+                  <label class="score-label">Score</label>
+                  <input
+                    type="number"
+                    id="finalExamScore"
+                    name="final_exam_score"
+                    class="form-input score-field"
+                    placeholder="0"
+                    min="0"
+                    step="0.01"
+                  >
+                </div>
+                <span class="score-divider">/</span>
+                <div class="score-input-group">
+                  <label class="score-label">Total</label>
+                  <input
+                    type="number"
+                    id="finalExamTotal"
+                    name="final_exam_total"
+                    class="form-input total-field"
+                    placeholder="100"
+                    min="0.01"
+                    step="0.01"
+                    value="100"
+                  >
+                </div>
+              </div>
+            </div>
+
+            <div class="score-pair">
+              <label class="form-label">Laboratory / Practicum</label>
+              <div class="score-inputs">
+                <div class="score-input-group">
+                  <label class="score-label">Score</label>
+                  <input
+                    type="number"
+                    id="labScore"
+                    name="lab_score"
+                    class="form-input score-field"
+                    placeholder="0"
+                    min="0"
+                    step="0.01"
+                  >
+                </div>
+                <span class="score-divider">/</span>
+                <div class="score-input-group">
+                  <label class="score-label">Total</label>
+                  <input
+                    type="number"
+                    id="labTotal"
+                    name="lab_total"
+                    class="form-input total-field"
+                    placeholder="100"
+                    min="0.01"
+                    step="0.01"
+                    value="100"
+                  >
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-section-header">
+            <h3 class="section-title">Additional Assessments</h3>
+          </div>
+
+          <div class="additional-assessments">
+            <button type="button" class="add-assessment-btn" id="addAssessmentBtn">
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                <path d="M10 4v12M4 10h12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+              </svg>
+              Add Assessment
+            </button>
+          </div>
+
+          <div id="customInputsContainer" class="custom-inputs-container">
+          </div>
+
+          <div class="grade-section">
+            <div class="grade-label">Calculated Grade</div>
+            <div class="grade-display" id="calculatedGrade">--</div>
+          </div>
+
+          <div class="form-actions">
+            <button type="button" class="btn btn-calculate" id="calculateBtn">
+              Calculate Grade
+            </button>
+            <button type="button" class="btn btn-save" id="saveBtn">
+              Save Grade
+            </button>
+            <button type="button" class="btn btn-delete" id="deleteGradeBtn">
+              Delete Grade
+            </button>
+          </div>
+        </form>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    async function checkAuth() {
+      try {
+        const response = await fetch('/api/check-auth', {
+          credentials: 'include'
+        });
+        const data = await response.json();
+        if (!data.authenticated) {
+          window.location.href = '/login.html';
+        }
+      } catch (error) {
+        console.error('Auth check error:', error);
+        window.location.href = '/login.html';
+      }
+    }
+
+    const logoutBtn = document.getElementById('logoutBtn');
+    if (logoutBtn) {
+      logoutBtn.addEventListener('click', async () => {
+        try {
+          await fetch('/api/logout', {
+            method: 'POST',
+            credentials: 'include'
+          });
+          window.location.href = '/login.html';
+        } catch (error) {
+          console.error('Logout error:', error);
+          alert('Error logging out. Please try again.');
+        }
+      });
+    }
+
+    checkAuth();
+  </script>
+
+  <script src="../src/subjects.js"></script>
+  <script src="../src/Sample.js"></script>
+</body>
+</html>

@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Student Grade Report</title>
+  <link rel="stylesheet" href="../src/StudentGrades.css">
+  <style>
+    body {
+      background: linear-gradient(135deg, rgba(30, 41, 59, 0.95) 0%, rgba(15, 23, 42, 0.98) 100%), url('Background.jpg') center/cover no-repeat fixed;
+      background-attachment: fixed;
+    }
+  </style>
+</head>
+<body>
+  <div class="page-container">
+    <header class="page-header">
+      <div class="header-left">
+        <img src="Logo.jpg" alt="School Logo" class="school-logo">
+      </div>
+      <div class="header-center">
+        <h1 class="page-title">Student Grade Report</h1>
+      </div>
+      <div class="header-right">
+        <a href="Sample.html" class="btn-back">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+            <path d="M19 12H5M12 19l-7-7 7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          Back to Edit
+        </a>
+        <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode">
+          <span class="toggle-track">
+            <span class="toggle-thumb"></span>
+          </span>
+        </button>
+        <button class="btn-logout" id="logoutBtn">
+          Logout
+        </button>
+      </div>
+    </header>
+
+    <main class="main-content">
+      <div class="report-container">
+        <div class="report-header">
+          <div class="student-info-card">
+            <div class="student-avatar-large"></div>
+            <div class="student-details">
+              <h2 class="student-name" id="studentName">Select a Student</h2>
+              <p class="student-id" id="studentId">ID: --</p>
+              <p class="student-section" id="studentSection">Section: --</p>
+            </div>
+          </div>
+          <button class="btn-download" id="downloadBtn">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <polyline points="7 10 12 15 17 10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <line x1="12" y1="15" x2="12" y2="3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Download
+          </button>
+        </div>
+
+        <div class="student-selector">
+          <label for="studentSelect" class="selector-label">View Grades:</label>
+          <select id="studentSelect" class="student-select">
+            <option value="">Select Student</option>
+          </select>
+        </div>
+
+        <div class="grades-table-wrapper" id="gradesContainer">
+          <p class="no-data-message">Select a student to view grades</p>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    async function checkAuth() {
+      try {
+        const response = await fetch('/api/check-auth', {
+          credentials: 'include'
+        });
+        const data = await response.json();
+        if (!data.authenticated) {
+          window.location.href = '/login.html';
+        }
+      } catch (error) {
+        console.error('Auth check error:', error);
+        window.location.href = '/login.html';
+      }
+    }
+
+    const logoutBtn = document.getElementById('logoutBtn');
+    if (logoutBtn) {
+      logoutBtn.addEventListener('click', async () => {
+        try {
+          await fetch('/api/logout', {
+            method: 'POST',
+            credentials: 'include'
+          });
+          window.location.href = '/login.html';
+        } catch (error) {
+          console.error('Logout error:', error);
+          alert('Error logging out. Please try again.');
+        }
+      });
+    }
+
+    checkAuth();
+  </script>
+
+  <script src="../src/subjects.js"></script>
+  <script src="../src/StudentGrades.js"></script>
+</body>
+</html>
