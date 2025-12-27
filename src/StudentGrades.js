@@ -1,5 +1,4 @@
 let allStudents = [];
-let allGrades = {};
 let currentSelectedStudent = null;
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -13,19 +12,54 @@ function initializeTheme() {
   document.documentElement.setAttribute('data-theme', savedTheme);
 }
 
-function initializeStudentView() {
-  const savedStudents = localStorage.getItem('students');
-  const savedGrades = localStorage.getItem('grades');
-
-  if (savedStudents) {
-    allStudents = JSON.parse(savedStudents);
+async function initializeSubjects() {
+  try {
+    const response = await fetch('/subjects', {
+      credentials: 'include'
+    });
+    if (response.ok) {
+      subjects = await response.json();
+      console.log('Subjects loaded:', subjects);
+    } else {
+      console.error('Failed to load subjects');
+      // Fallback to default subjects
+      subjects = [
+        { id: 1, name: 'Mathematics' },
+        { id: 2, name: 'Science' },
+        { id: 3, name: 'English' },
+        { id: 4, name: 'History' }
+      ];
+    }
+  } catch (error) {
+    console.error('Error loading subjects:', error);
+    // Fallback to default subjects
+    subjects = [
+      { id: 1, name: 'Mathematics' },
+      { id: 2, name: 'Science' },
+      { id: 3, name: 'English' },
+      { id: 4, name: 'History' }
+    ];
   }
+}
 
-  if (savedGrades) {
-    allGrades = JSON.parse(savedGrades);
+async function initializeStudentView() {
+  try {
+    // Fetch all students from API
+    const response = await fetch('/students', {
+      credentials: 'include'
+    });
+
+    if (response.ok) {
+      allStudents = await response.json();
+      loadStudentsList();
+    } else {
+      console.error('Failed to fetch students');
+      showError('Failed to load students. Please try again.');
+    }
+  } catch (error) {
+    console.error('Error fetching students:', error);
+    showError('Error loading students. Please check your connection.');
   }
-
-  loadStudentsList();
 }
 
 function setupEventListeners() {
@@ -76,7 +110,13 @@ function loadStudentsList() {
     ).join('');
 }
 
-function displayStudentGrades(studentId) {
+function showError(message) {
+  console.error(message);
+  // You could implement a more sophisticated error display here
+  alert(message);
+}
+
+async function displayStudentGrades(studentId) {
   currentSelectedStudent = allStudents.find(s => s.id === studentId);
 
   if (!currentSelectedStudent) {
@@ -87,15 +127,33 @@ function displayStudentGrades(studentId) {
 
   updateStudentInfo(currentSelectedStudent);
 
-  const studentGrades = allGrades[studentId] || {};
+  try {
+    // Fetch grades for the selected student
+    const response = await fetch(`/grades/${studentId}`, {
+      credentials: 'include'
+    });
 
-  if (Object.keys(studentGrades).length === 0) {
+    if (response.ok) {
+      const gradesData = await response.json();
+      const studentGrades = gradesData.grades || {};
+
+      if (Object.keys(studentGrades).length === 0) {
+        document.getElementById('gradesContainer').innerHTML =
+          '<p class="no-data-message">No grades available for this student</p>';
+        return;
+      }
+
+      renderGradesTable(studentGrades);
+    } else {
+      console.error('Failed to fetch grades');
+      document.getElementById('gradesContainer').innerHTML =
+        '<p class="no-data-message">Failed to load grades. Please try again.</p>';
+    }
+  } catch (error) {
+    console.error('Error fetching grades:', error);
     document.getElementById('gradesContainer').innerHTML =
-      '<p class="no-data-message">No grades available for this student</p>';
-    return;
+      '<p class="no-data-message">Error loading grades. Please check your connection.</p>';
   }
-
-  renderGradesTable(studentGrades);
 }
 
 function updateStudentInfo(student) {
@@ -182,43 +240,59 @@ function getSubjectName(subjectId) {
   return subject ? subject.name : `Subject ${subjectId}`;
 }
 
-function downloadGradeReport() {
+async function downloadGradeReport() {
   if (!currentSelectedStudent) {
     alert('Please select a student first');
     return;
   }
 
-  const studentGrades = allGrades[currentSelectedStudent.id] || {};
+  try {
+    // Fetch grades for the selected student
+    const response = await fetch(`/grades/${currentSelectedStudent.id}`, {
+      credentials: 'include'
+    });
 
-  if (Object.keys(studentGrades).length === 0) {
-    alert('No grades available to download');
-    return;
+    if (!response.ok) {
+      alert('Failed to fetch grades for download');
+      return;
+    }
+
+    const gradesData = await response.json();
+    const studentGrades = gradesData.grades || {};
+
+    if (Object.keys(studentGrades).length === 0) {
+      alert('No grades available to download');
+      return;
+    }
+
+    let csvContent = 'data:text/csv;charset=utf-8,';
+
+    csvContent += 'Student Grade Report\n';
+    csvContent += `Student Name,${currentSelectedStudent.name}\n`;
+    csvContent += `Student ID,${currentSelectedStudent.id}\n`;
+    csvContent += `Generated Date,${new Date().toLocaleDateString()}\n\n`;
+
+    csvContent += 'Subject,Letter Grade,Score,Status\n';
+
+    Object.entries(studentGrades).forEach(([subjectId, gradeData]) => {
+      const subjectName = gradeData.subjectName || getSubjectName(parseInt(subjectId));
+      const score = parseFloat(gradeData.finalGrade) || 0;
+      const letterGrade = getLetterGrade(score);
+      const status = score >= 75 ? 'Passed' : 'Failed';
+
+      csvContent += `"${subjectName}","${letterGrade}",${score.toFixed(2)},"${status}"\n`;
+    });
+
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement('a');
+    link.setAttribute('href', encodedUri);
+    link.setAttribute('download', `grade_report_${currentSelectedStudent.name.replace(/\s+/g, '_')}.csv`);
+    document.body.appendChild(link);
+
+    link.click();
+    document.body.removeChild(link);
+  } catch (error) {
+    console.error('Error downloading grade report:', error);
+    alert('Error downloading grade report. Please try again.');
   }
-
-  let csvContent = 'data:text/csv;charset=utf-8,';
-
-  csvContent += 'Student Grade Report\n';
-  csvContent += `Student Name,${currentSelectedStudent.name}\n`;
-  csvContent += `Student ID,${currentSelectedStudent.id}\n`;
-  csvContent += `Generated Date,${new Date().toLocaleDateString()}\n\n`;
-
-  csvContent += 'Subject,Letter Grade,Score,Status\n';
-
-  Object.entries(studentGrades).forEach(([subjectId, gradeData]) => {
-    const subjectName = gradeData.subjectName || getSubjectName(parseInt(subjectId));
-    const score = parseFloat(gradeData.finalGrade) || 0;
-    const letterGrade = getLetterGrade(score);
-    const status = score >= 75 ? 'Passed' : 'Failed';
-
-    csvContent += `"${subjectName}","${letterGrade}",${score.toFixed(2)},"${status}"\n`;
-  });
-
-  const encodedUri = encodeURI(csvContent);
-  const link = document.createElement('a');
-  link.setAttribute('href', encodedUri);
-  link.setAttribute('download', `grade_report_${currentSelectedStudent.name.replace(/\s+/g, '_')}.csv`);
-  document.body.appendChild(link);
-
-  link.click();
-  document.body.removeChild(link);
 }

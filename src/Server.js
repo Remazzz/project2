@@ -254,6 +254,31 @@ app.post('/sections', requireAuth, async (req, res) => {
   }
 });
 
+// Get all students
+app.get('/students', requireAuth, async (req, res) => {
+  try {
+    console.log('👥 Fetching all students...');
+    // Get all sections first
+    const sections = await Database.getSections();
+    let allStudents = [];
+
+    // Get students from each section
+    for (const section of sections) {
+      const students = await Database.getStudentsBySection(section.id);
+      allStudents = allStudents.concat(students);
+    }
+
+    console.log(`✅ Found ${allStudents.length} students total`);
+    res.json(allStudents);
+  } catch (error) {
+    console.error('❌ Error fetching all students:', error.message);
+    res.status(500).json({
+      error: 'Failed to fetch students',
+      message: error.message
+    });
+  }
+});
+
 // Get students by section
 app.get('/students/:sectionId', requireAuth, async (req, res) => {
   try {
@@ -264,9 +289,9 @@ app.get('/students/:sectionId', requireAuth, async (req, res) => {
     res.json(students);
   } catch (error) {
     console.error('❌ Error fetching students:', error.message);
-    res.status(500).json({ 
+    res.status(500).json({
       error: 'Failed to fetch students',
-      message: error.message 
+      message: error.message
     });
   }
 });

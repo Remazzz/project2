@@ -1,3 +1,9 @@
-# Student Grading System - Implementation Plan
+# Fix Student Grades Display Issues
 
-## Issues to Fix
+## Tasks
+- [ ] Fix property access in renderGradesTable function (subject_name and final_grade)
+- [ ] Call initializeSubjects() in DOMContentLoaded event
+- [ ] Test the changes to ensure grades display correctly
+
+## Status
+In Progress
