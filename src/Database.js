@@ -450,16 +450,30 @@ class Database {
   static async getStudentsBySection(sectionId) {
     try {
       const [rows] = await pool.execute(`
-        SELECT s.*, sg.status, sg.final_grade, sg.letter_grade 
-        FROM students s 
-        LEFT JOIN student_grades sg ON s.id = sg.student_id 
-        WHERE s.section_id = ? 
+        SELECT s.*, sg.status, sg.final_grade, sg.letter_grade
+        FROM students s
+        LEFT JOIN student_grades sg ON s.id = sg.student_id
+        WHERE s.section_id = ?
         ORDER BY s.name
       `, [sectionId]);
       return rows;
     } catch (error) {
       console.error('Database error in getStudentsBySection:', error);
       throw new Error(`Failed to get students: ${error.message}`);
+    }
+  }
+
+  static async getAllStudents() {
+    try {
+      const [rows] = await pool.execute(`
+        SELECT DISTINCT s.id, s.name, s.section_id, s.created_at
+        FROM students s
+        ORDER BY s.name
+      `);
+      return rows;
+    } catch (error) {
+      console.error('Database error in getAllStudents:', error);
+      throw new Error(`Failed to get all students: ${error.message}`);
     }
   }
 

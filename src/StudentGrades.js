@@ -3,6 +3,7 @@ let currentSelectedStudent = null;
 
 document.addEventListener('DOMContentLoaded', () => {
   initializeTheme();
+  initializeSubjects();
   initializeStudentView();
   setupEventListeners();
 });
@@ -195,8 +196,8 @@ function renderGradesTable(studentGrades) {
   `;
 
   Object.entries(studentGrades).forEach(([subjectId, gradeData]) => {
-    const subjectName = gradeData.subjectName || getSubjectName(parseInt(subjectId));
-    const score = parseFloat(gradeData.finalGrade) || 0;
+    const subjectName = gradeData.subject_name || getSubjectName(parseInt(subjectId));
+    const score = parseFloat(gradeData.final_grade) || 0;
     const letterGrade = getLetterGrade(score);
     const status = score >= 75 ? 'Passed' : 'Failed';
     const statusClass = status === 'Passed' ? 'status-passed' : 'status-failed';
@@ -275,8 +276,8 @@ async function downloadGradeReport() {
     csvContent += 'Subject,Letter Grade,Score,Status\n';
 
     Object.entries(studentGrades).forEach(([subjectId, gradeData]) => {
-      const subjectName = gradeData.subjectName || getSubjectName(parseInt(subjectId));
-      const score = parseFloat(gradeData.finalGrade) || 0;
+      const subjectName = gradeData.subject_name || getSubjectName(parseInt(subjectId));
+      const score = parseFloat(gradeData.final_grade) || 0;
       const letterGrade = getLetterGrade(score);
       const status = score >= 75 ? 'Passed' : 'Failed';
 

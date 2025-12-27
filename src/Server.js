@@ -258,16 +258,7 @@ app.post('/sections', requireAuth, async (req, res) => {
 app.get('/students', requireAuth, async (req, res) => {
   try {
     console.log('👥 Fetching all students...');
-    // Get all sections first
-    const sections = await Database.getSections();
-    let allStudents = [];
-
-    // Get students from each section
-    for (const section of sections) {
-      const students = await Database.getStudentsBySection(section.id);
-      allStudents = allStudents.concat(students);
-    }
-
+    const allStudents = await Database.getAllStudents();
     console.log(`✅ Found ${allStudents.length} students total`);
     res.json(allStudents);
   } catch (error) {
