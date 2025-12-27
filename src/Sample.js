@@ -4,7 +4,6 @@ let currentSubjectId = null;
 let customInputCounter = 0;
 let sections = [];
 let students = [];
-let subjects = [];
 let customInputs = [];
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -95,7 +94,6 @@ function setupEventListeners() {
     subjectSelect.addEventListener('change', (e) => {
       if (e.target.value) {
         currentSubjectId = parseInt(e.target.value);
-        loadSubjects();
         if (currentStudentId) {
           loadStudentGrades(currentStudentId);
         }
@@ -266,6 +264,10 @@ function updateSelectedStudentInfo(studentName = null) {
 async function loadStudentGrades(studentId) {
   clearForm();
 
+  if (!currentSubjectId) {
+    return; // No subject selected, nothing to load
+  }
+
   try {
     const response = await fetch(`/grades/${studentId}`, {
       credentials: 'include'
@@ -273,35 +275,45 @@ async function loadStudentGrades(studentId) {
     if (!response.ok) throw new Error('Failed to load grades');
     const gradesData = await response.json();
 
-    if (gradesData && gradesData[currentSubjectId]) {
-      const grade = gradesData[currentSubjectId];
-      document.getElementById('classParticipation').value = grade.classParticipation || '';
+    if (gradesData && gradesData.grades && gradesData.grades[currentSubjectId]) {
+      const grade = gradesData.grades[currentSubjectId];
+      document.getElementById('classParticipation').value = grade.class_participation || '';
       document.getElementById('attendance').value = grade.attendance || '';
-      document.getElementById('quiz1Score').value = grade.quiz1Score || '';
-      document.getElementById('quiz1Total').value = grade.quiz1Total || '100';
-      document.getElementById('quiz2Score').value = grade.quiz2Score || '';
-      document.getElementById('quiz2Total').value = grade.quiz2Total || '100';
-      document.getElementById('finalExamScore').value = grade.finalExamScore || '';
-      document.getElementById('finalExamTotal').value = grade.finalExamTotal || '100';
-      document.getElementById('labScore').value = grade.labScore || '';
-      document.getElementById('labTotal').value = grade.labTotal || '100';
+      document.getElementById('quiz1Score').value = grade.quiz1_score || '';
+      document.getElementById('quiz1Total').value = grade.quiz1_total || '100';
+      document.getElementById('quiz2Score').value = grade.quiz2_score || '';
+      document.getElementById('quiz2Total').value = grade.quiz2_total || '100';
+      document.getElementById('finalExamScore').value = grade.final_exam_score || '';
+      document.getElementById('finalExamTotal').value = grade.final_exam_total || '100';
+      document.getElementById('labScore').value = grade.lab_score || '';
+      document.getElementById('labTotal').value = grade.lab_total || '100';
 
-      if (grade.customInputs && grade.customInputs.length > 0) {
-        grade.customInputs.forEach(input => {
-          addCustomInput();
-          const container = document.getElementById('customInputsContainer');
-          const lastInput = container.lastElementChild;
-          if (lastInput) {
-            const inputField = lastInput.querySelector('.form-input');
-            const labelField = lastInput.querySelector('.form-label');
-            if (inputField) inputField.value = input.value || '';
-            if (labelField) labelField.textContent = input.label || `Assessment ${customInputCounter}`;
-          }
-        });
+      // Handle custom assessments stored as JSON
+      if (grade.custom_assessments) {
+        let customAssessments;
+        try {
+          customAssessments = JSON.parse(grade.custom_assessments);
+        } catch (e) {
+          customAssessments = [];
+        }
+
+        if (customAssessments && customAssessments.length > 0) {
+          customAssessments.forEach(assessment => {
+            addCustomInput();
+            const container = document.getElementById('customInputsContainer');
+            const lastInput = container.lastElementChild;
+            if (lastInput) {
+              const inputField = lastInput.querySelector('.form-input');
+              const labelField = lastInput.querySelector('.form-label');
+              if (inputField) inputField.value = assessment.value || '';
+              if (labelField) labelField.textContent = assessment.label || `Assessment ${customInputCounter}`;
+            }
+          });
+        }
       }
 
-      if (grade.finalGrade) {
-        document.getElementById('calculatedGrade').textContent = grade.finalGrade;
+      if (grade.final_grade) {
+        document.getElementById('calculatedGrade').textContent = grade.final_grade;
       }
     }
   } catch (error) {
@@ -364,19 +376,19 @@ function calculateGrade() {
 
   const quiz1Score = parseFloat(document.getElementById('quiz1Score')?.value) || 0;
   const quiz1Total = parseFloat(document.getElementById('quiz1Total')?.value) || 1;
-  const quiz1Percentage = (quiz1Score / quiz1Total) * 100;
+  const quiz1Percentage = quiz1Total === 0 ? 0 : (quiz1Score / quiz1Total) * 100;
 
   const quiz2Score = parseFloat(document.getElementById('quiz2Score')?.value) || 0;
   const quiz2Total = parseFloat(document.getElementById('quiz2Total')?.value) || 1;
-  const quiz2Percentage = (quiz2Score / quiz2Total) * 100;
+  const quiz2Percentage = quiz2Total === 0 ? 0 : (quiz2Score / quiz2Total) * 100;
 
   const finalExamScore = parseFloat(document.getElementById('finalExamScore')?.value) || 0;
   const finalExamTotal = parseFloat(document.getElementById('finalExamTotal')?.value) || 1;
-  const finalExamPercentage = (finalExamScore / finalExamTotal) * 100;
+  const finalExamPercentage = finalExamTotal === 0 ? 0 : (finalExamScore / finalExamTotal) * 100;
 
   const labScore = parseFloat(document.getElementById('labScore')?.value) || 0;
   const labTotal = parseFloat(document.getElementById('labTotal')?.value) || 1;
-  const labPercentage = (labScore / labTotal) * 100;
+  const labPercentage = labTotal === 0 ? 0 : (labScore / labTotal) * 100;
 
   const grade = (
     (classParticipation * 0.15) +
@@ -425,25 +437,45 @@ async function saveGrade() {
     }
   });
 
-  const gradeData = {
-    subjectId: currentSubjectId,
-    classParticipation: document.getElementById('classParticipation')?.value || '',
-    attendance: document.getElementById('attendance')?.value || '',
-    quiz1Score: document.getElementById('quiz1Score')?.value || '',
-    quiz1Total: document.getElementById('quiz1Total')?.value || '100',
-    quiz2Score: document.getElementById('quiz2Score')?.value || '',
-    quiz2Total: document.getElementById('quiz2Total')?.value || '100',
-    finalExamScore: document.getElementById('finalExamScore')?.value || '',
-    finalExamTotal: document.getElementById('finalExamTotal')?.value || '100',
-    labScore: document.getElementById('labScore')?.value || '',
-    labTotal: document.getElementById('labTotal')?.value || '100',
-    customInputs: customInputs,
-    finalGrade: gradeDisplay.textContent,
-    subjectName: getSubjectName(currentSubjectId)
+  // Calculate letter grade based on final grade
+  const finalGrade = parseFloat(gradeDisplay.textContent);
+  let letterGrade = 'F';
+  if (finalGrade >= 90) letterGrade = 'A';
+  else if (finalGrade >= 80) letterGrade = 'B';
+  else if (finalGrade >= 70) letterGrade = 'C';
+  else if (finalGrade >= 60) letterGrade = 'D';
+
+  // Helper function to safely parse float values
+  const safeParseFloat = (value, defaultValue = 0) => {
+    const parsed = parseFloat(value);
+    return isNaN(parsed) ? defaultValue : parsed;
   };
 
+  const gradeData = {
+    classParticipation: safeParseFloat(document.getElementById('classParticipation')?.value, 0),
+    attendance: safeParseFloat(document.getElementById('attendance')?.value, 0),
+    quiz1Score: safeParseFloat(document.getElementById('quiz1Score')?.value, 0),
+    quiz1Total: safeParseFloat(document.getElementById('quiz1Total')?.value, 100),
+    quiz2Score: safeParseFloat(document.getElementById('quiz2Score')?.value, 0),
+    quiz2Total: safeParseFloat(document.getElementById('quiz2Total')?.value, 100),
+    finalExamScore: safeParseFloat(document.getElementById('finalExamScore')?.value, 0),
+    finalExamTotal: safeParseFloat(document.getElementById('finalExamTotal')?.value, 100),
+    labScore: safeParseFloat(document.getElementById('labScore')?.value, 0),
+    labTotal: safeParseFloat(document.getElementById('labTotal')?.value, 100),
+    customInputs: customInputs,
+    finalGrade: finalGrade,
+    letterGrade: letterGrade,
+    status: 'completed'
+  };
+
+  // Validate that totals are not zero to prevent division by zero
+  if (gradeData.quiz1Total === 0) gradeData.quiz1Total = 100;
+  if (gradeData.quiz2Total === 0) gradeData.quiz2Total = 100;
+  if (gradeData.finalExamTotal === 0) gradeData.finalExamTotal = 100;
+  if (gradeData.labTotal === 0) gradeData.labTotal = 100;
+
   try {
-    await saveGradeToAPI(currentStudentId, gradeData);
+    await saveGradeToAPI(currentStudentId, currentSubjectId, gradeData);
     alert(`Grade saved successfully for ${getSubjectName(currentSubjectId)}!`);
   } catch (error) {
     alert('Error saving grade: ' + error.message);
@@ -494,17 +526,21 @@ function clearForm() {
   customInputCounter = 0;
 }
 
-function initializeSubjects() {
-  // Initialize with default subjects if none exist
-  if (subjects.length === 0) {
+async function initializeSubjects() {
+  try {
+    await loadSubjectsFromAPI();
+    loadSubjects();
+  } catch (error) {
+    console.error('Failed to load subjects from API, using defaults:', error);
+    // Fallback to default subjects if API fails
     subjects = [
       { id: 1, name: 'Mathematics' },
       { id: 2, name: 'Science' },
       { id: 3, name: 'English' },
       { id: 4, name: 'History' }
     ];
+    loadSubjects();
   }
-  loadSubjects();
 }
 
 function loadSubjects() {
@@ -532,10 +568,13 @@ async function addSubject() {
     return;
   }
 
-  const newId = subjects.length > 0 ? Math.max(...subjects.map(s => s.id)) + 1 : 1;
-  subjects.push({ id: newId, name: subjectName.trim() });
-  loadSubjects();
-  alert('Subject added successfully!');
+  try {
+    await addSubjectToAPI(subjectName.trim());
+    loadSubjects();
+    alert('Subject added successfully!');
+  } catch (error) {
+    alert('Error adding subject: ' + error.message);
+  }
 }
 
 // API Functions
@@ -666,7 +705,7 @@ async function deleteStudentFromAPI(studentId) {
   }
 }
 
-async function saveGradeToAPI(studentId, gradeData) {
+async function saveGradeToAPI(studentId, subjectId, gradeData) {
   try {
     const response = await fetch('/grades', {
       method: 'POST',
@@ -674,7 +713,7 @@ async function saveGradeToAPI(studentId, gradeData) {
         'Content-Type': 'application/json'
       },
       credentials: 'include',
-      body: JSON.stringify({ studentId, ...gradeData })
+      body: JSON.stringify({ studentId, subjectId, ...gradeData })
     });
     if (!response.ok) throw new Error('Failed to save grade');
     return await response.json();
@@ -694,6 +733,42 @@ async function deleteGradeToAPI(studentId, subjectId) {
     return true;
   } catch (error) {
     console.error('Error deleting grade:', error);
+    throw error;
+  }
+}
+
+// Subjects API Functions
+async function loadSubjectsFromAPI() {
+  try {
+    const response = await fetch('/subjects', {
+      credentials: 'include'
+    });
+    if (!response.ok) throw new Error('Failed to load subjects');
+    subjects = await response.json();
+    console.log('Subjects loaded from API:', subjects);
+    return subjects;
+  } catch (error) {
+    console.error('Error loading subjects:', error);
+    throw error;
+  }
+}
+
+async function addSubjectToAPI(subjectName, teacherId = null) {
+  try {
+    const response = await fetch('/subjects', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      credentials: 'include',
+      body: JSON.stringify({ name: subjectName, teacherId })
+    });
+    if (!response.ok) throw new Error('Failed to add subject');
+    const result = await response.json();
+    subjects.push(result);
+    return result;
+  } catch (error) {
+    console.error('Error adding subject:', error);
     throw error;
   }
 }

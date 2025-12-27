@@ -375,16 +375,83 @@ app.get('/grades/:studentId', requireAuth, async (req, res) => {
 // Save student grades
 app.post('/grades', requireAuth, async (req, res) => {
   try {
-    const { studentId, ...gradesData } = req.body;
-    console.log(`💾 Saving grades for student ID: ${studentId}`);
-    await Database.saveStudentGrades(studentId, gradesData);
-    console.log(`✅ Grades saved for student ${studentId}`);
+    const { studentId, subjectId, ...gradesData } = req.body;
+    console.log(`💾 Saving grades for student ID: ${studentId}, subject ID: ${subjectId}`);
+    await Database.saveStudentGrades(studentId, subjectId, gradesData);
+    console.log(`✅ Grades saved for student ${studentId}, subject ${subjectId}`);
     res.json({ message: 'Grades saved successfully' });
   } catch (error) {
     console.error('❌ Error saving grades:', error.message);
-    res.status(500).json({ 
+    res.status(500).json({
       error: 'Failed to save grades',
-      message: error.message 
+      message: error.message
+    });
+  }
+});
+
+// Delete student grade for specific subject
+app.delete('/grades/:studentId/:subjectId', requireAuth, async (req, res) => {
+  try {
+    const { studentId, subjectId } = req.params;
+    console.log(`🗑️  Deleting grades for student ID: ${studentId}, subject ID: ${subjectId}`);
+    await Database.deleteStudentGrade(studentId, subjectId);
+    console.log(`✅ Grades deleted for student ${studentId}, subject ${subjectId}`);
+    res.json({ message: 'Grades deleted successfully' });
+  } catch (error) {
+    console.error('❌ Error deleting grades:', error.message);
+    res.status(500).json({
+      error: 'Failed to delete grades',
+      message: error.message
+    });
+  }
+});
+
+// Get all subjects
+app.get('/subjects', requireAuth, async (req, res) => {
+  try {
+    console.log('📚 Fetching subjects...');
+    const subjects = await Database.getSubjects();
+    console.log(`✅ Found ${subjects.length} subjects`);
+    res.json(subjects);
+  } catch (error) {
+    console.error('❌ Error fetching subjects:', error.message);
+    res.status(500).json({
+      error: 'Failed to fetch subjects',
+      message: 'Make sure XAMPP MySQL is running'
+    });
+  }
+});
+
+// Add new subject
+app.post('/subjects', requireAuth, async (req, res) => {
+  try {
+    const { name, teacherId } = req.body;
+    console.log(`📝 Adding new subject: ${name}`);
+    const subjectId = await Database.addSubject(name, teacherId);
+    console.log(`✅ Subject added with ID: ${subjectId}`);
+    res.json({ id: subjectId, name, teacherId, message: 'Subject added successfully' });
+  } catch (error) {
+    console.error('❌ Error adding subject:', error.message);
+    res.status(500).json({
+      error: 'Failed to add subject',
+      message: error.message
+    });
+  }
+});
+
+// Delete subject
+app.delete('/subjects/:subjectId', requireAuth, async (req, res) => {
+  try {
+    const { subjectId } = req.params;
+    console.log(`🗑️  Deleting subject ID: ${subjectId}`);
+    await Database.deleteSubject(subjectId);
+    console.log(`✅ Subject deleted`);
+    res.json({ message: 'Subject deleted successfully' });
+  } catch (error) {
+    console.error('❌ Error deleting subject:', error.message);
+    res.status(500).json({
+      error: 'Failed to delete subject',
+      message: error.message
     });
   }
 });

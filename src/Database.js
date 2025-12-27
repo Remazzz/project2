@@ -86,14 +86,59 @@ async function testConnection() {
     } else {
       console.log('✅ Tables already exist');
       // Verify all required tables exist
-      const requiredTables = ['users', 'sections', 'students', 'custom_inputs', 'student_grades', 'custom_input_values'];
+      const requiredTables = ['users', 'sections', 'students', 'subjects', 'custom_inputs', 'student_grades', 'custom_input_values'];
       const existingTableNames = tables.map(t => Object.values(t)[0]);
       const missingTables = requiredTables.filter(table => !existingTableNames.includes(table));
-      
+
       if (missingTables.length > 0) {
         console.log('⚠️  Missing tables:', missingTables);
         console.log('📋 Creating missing tables...');
         await createTables(connection);
+      } else {
+        // Check if student_grades table has the correct structure
+        console.log('🔍 Checking student_grades table structure...');
+        const [columns] = await connection.execute('DESCRIBE student_grades');
+        const columnNames = columns.map(c => c.Field);
+
+        // Check if it has the wrong columns
+        const hasWrongColumns = columnNames.includes('custom_assessments') ||
+                                columnNames.includes('lab_score') ||
+                                columnNames.includes('lab_total');
+
+        if (hasWrongColumns) {
+          console.log('⚠️  student_grades table has incorrect structure. Recreating...');
+          await connection.execute('DROP TABLE IF EXISTS student_grades');
+          console.log('✅ Dropped old student_grades table');
+
+          // Recreate the table with correct structure
+          const createStudentGradesTable = `CREATE TABLE student_grades (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            student_id INT NOT NULL,
+            subject_id INT NOT NULL,
+            class_participation DECIMAL(5,2) DEFAULT 0.00,
+            attendance DECIMAL(5,2) DEFAULT 0.00,
+            quiz1_score DECIMAL(8,2) DEFAULT 0.00,
+            quiz1_total DECIMAL(8,2) DEFAULT 1.00,
+            quiz2_score DECIMAL(8,2) DEFAULT 0.00,
+            quiz2_total DECIMAL(8,2) DEFAULT 1.00,
+            final_exam_score DECIMAL(8,2) DEFAULT 0.00,
+            final_exam_total DECIMAL(8,2) DEFAULT 1.00,
+            lab_grade DECIMAL(5,2) DEFAULT 0.00,
+            final_grade DECIMAL(5,2) DEFAULT 0.00,
+            letter_grade VARCHAR(3) DEFAULT 'F',
+            status ENUM('pending', 'completed') DEFAULT 'pending',
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+            FOREIGN KEY (student_id) REFERENCES students(id) ON DELETE CASCADE,
+            FOREIGN KEY (subject_id) REFERENCES subjects(id) ON DELETE CASCADE,
+            UNIQUE KEY unique_student_subject (student_id, subject_id)
+          ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`;
+
+          await connection.execute(createStudentGradesTable);
+          console.log('✅ Recreated student_grades table with correct structure');
+        } else {
+          console.log('✅ student_grades table structure is correct');
+        }
       }
     }
     
@@ -146,6 +191,7 @@ async function createTables(connection) {
       'DROP TABLE IF EXISTS student_grades',
       'DROP TABLE IF EXISTS custom_inputs',
       'DROP TABLE IF EXISTS students',
+      'DROP TABLE IF EXISTS subjects',
       'DROP TABLE IF EXISTS sections',
       'DROP TABLE IF EXISTS users'
     ];
@@ -195,10 +241,20 @@ async function createTables(connection) {
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`,
       
+      // Subjects table
+      `CREATE TABLE subjects (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        name VARCHAR(255) NOT NULL,
+        teacher_id INT DEFAULT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (teacher_id) REFERENCES users(id) ON DELETE SET NULL
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`,
+
       // Student grades table
       `CREATE TABLE student_grades (
         id INT AUTO_INCREMENT PRIMARY KEY,
         student_id INT NOT NULL,
+        subject_id INT NOT NULL,
         class_participation DECIMAL(5,2) DEFAULT 0.00,
         attendance DECIMAL(5,2) DEFAULT 0.00,
         quiz1_score DECIMAL(8,2) DEFAULT 0.00,
@@ -214,7 +270,8 @@ async function createTables(connection) {
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         FOREIGN KEY (student_id) REFERENCES students(id) ON DELETE CASCADE,
-        UNIQUE KEY unique_student_grade (student_id)
+        FOREIGN KEY (subject_id) REFERENCES subjects(id) ON DELETE CASCADE,
+        UNIQUE KEY unique_student_subject (student_id, subject_id)
       ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`,
       
       // Custom input values table
@@ -263,6 +320,15 @@ async function createTables(connection) {
       (1, 'Rey Mark Malabarbas', 1),
       (2, 'Maria Santos', 1),
       (3, 'John Doe', 2)
+    `);
+
+    // Insert subjects
+    await connection.execute(`
+      INSERT INTO subjects (id, name, teacher_id) VALUES
+      (1, 'Mathematics', 2),
+      (2, 'Science', 2),
+      (3, 'English', 2),
+      (4, 'History', 2)
     `);
 
     // Insert custom inputs
@@ -455,20 +521,30 @@ class Database {
   // Grades
   static async getStudentGrades(studentId) {
     try {
-      const [gradeRows] = await pool.execute(
-        'SELECT * FROM student_grades WHERE student_id = ?',
-        [studentId]
-      );
+      // Get grades grouped by subject
+      const [gradeRows] = await pool.execute(`
+        SELECT sg.*, s.name as subject_name
+        FROM student_grades sg
+        JOIN subjects s ON sg.subject_id = s.id
+        WHERE sg.student_id = ?
+        ORDER BY s.name
+      `, [studentId]);
+
+      // Group grades by subject_id
+      const gradesBySubject = {};
+      gradeRows.forEach(grade => {
+        gradesBySubject[grade.subject_id] = grade;
+      });
 
       const [customRows] = await pool.execute(`
-        SELECT civ.*, ci.name, ci.type 
-        FROM custom_input_values civ 
-        JOIN custom_inputs ci ON civ.custom_input_id = ci.id 
+        SELECT civ.*, ci.name, ci.type
+        FROM custom_input_values civ
+        JOIN custom_inputs ci ON civ.custom_input_id = ci.id
         WHERE civ.student_id = ?
       `, [studentId]);
 
       return {
-        grades: gradeRows[0] || null,
+        grades: gradesBySubject,
         customInputs: customRows
       };
     } catch (error) {
@@ -477,19 +553,22 @@ class Database {
     }
   }
 
-  static async saveStudentGrades(studentId, gradesData) {
+  static async saveStudentGrades(studentId, subjectId, gradesData) {
     const connection = await pool.getConnection();
-    
+
     try {
+      console.log('🔍 Starting transaction for student', studentId, 'subject', subjectId);
+      console.log('📊 Grades data:', gradesData);
+
       await connection.beginTransaction();
 
       // Insert or update main grades
-      await connection.execute(`
+      const query = `
         INSERT INTO student_grades (
-          student_id, class_participation, attendance, quiz1_score, quiz1_total,
+          student_id, subject_id, class_participation, attendance, quiz1_score, quiz1_total,
           quiz2_score, quiz2_total, final_exam_score, final_exam_total,
           lab_grade, final_grade, letter_grade, status
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ON DUPLICATE KEY UPDATE
           class_participation = VALUES(class_participation),
           attendance = VALUES(attendance),
@@ -504,8 +583,11 @@ class Database {
           letter_grade = VALUES(letter_grade),
           status = VALUES(status),
           updated_at = CURRENT_TIMESTAMP
-      `, [
+      `;
+
+      const values = [
         studentId,
+        subjectId,
         gradesData.classParticipation,
         gradesData.attendance,
         gradesData.quiz1Score,
@@ -514,44 +596,80 @@ class Database {
         gradesData.quiz2Total,
         gradesData.finalExamScore,
         gradesData.finalExamTotal,
-        gradesData.labGrade,
+        gradesData.labScore, // This will be stored as lab_grade in the database
         gradesData.finalGrade,
         gradesData.letterGrade,
         gradesData.status
-      ]);
+      ];
 
-      // Handle custom input values
-      if (gradesData.customInputs) {
-        for (const [inputId, inputData] of Object.entries(gradesData.customInputs)) {
-          if (inputData.type === 'score') {
-            await connection.execute(`
-              INSERT INTO custom_input_values (student_id, custom_input_id, score_value, total_value)
-              VALUES (?, ?, ?, ?)
-              ON DUPLICATE KEY UPDATE
-                score_value = VALUES(score_value),
-                total_value = VALUES(total_value),
-                updated_at = CURRENT_TIMESTAMP
-            `, [studentId, inputId, inputData.score, inputData.total]);
-          } else {
-            await connection.execute(`
-              INSERT INTO custom_input_values (student_id, custom_input_id, percentage_value)
-              VALUES (?, ?, ?)
-              ON DUPLICATE KEY UPDATE
-                percentage_value = VALUES(percentage_value),
-                updated_at = CURRENT_TIMESTAMP
-            `, [studentId, inputId, inputData.value]);
-          }
-        }
-      }
+      console.log('🔍 Executing query with values:', values);
+      await connection.execute(query, values);
 
       await connection.commit();
-      console.log(`✅ Grades saved successfully for student ${studentId}`);
+      console.log(`✅ Grades saved successfully for student ${studentId}, subject ${subjectId}`);
     } catch (error) {
       await connection.rollback();
-      console.error('Database error in saveStudentGrades:', error);
+      console.error('❌ Database error in saveStudentGrades:', error);
+      console.error('❌ Error details:', {
+        message: error.message,
+        code: error.code,
+        errno: error.errno,
+        sqlState: error.sqlState,
+        sqlMessage: error.sqlMessage
+      });
       throw new Error(`Failed to save student grades: ${error.message}`);
     } finally {
       connection.release();
+    }
+  }
+
+  static async deleteStudentGrade(studentId, subjectId) {
+    try {
+      await pool.execute(
+        'DELETE FROM student_grades WHERE student_id = ? AND subject_id = ?',
+        [studentId, subjectId]
+      );
+    } catch (error) {
+      console.error('Database error in deleteStudentGrade:', error);
+      throw new Error(`Failed to delete student grade: ${error.message}`);
+    }
+  }
+
+  // Subjects
+  static async getSubjects() {
+    try {
+      const [rows] = await pool.execute(`
+        SELECT s.*, u.full_name as teacher_name
+        FROM subjects s
+        LEFT JOIN users u ON s.teacher_id = u.id
+        ORDER BY s.name
+      `);
+      return rows;
+    } catch (error) {
+      console.error('Database error in getSubjects:', error);
+      throw new Error(`Failed to get subjects: ${error.message}`);
+    }
+  }
+
+  static async addSubject(name, teacherId = null) {
+    try {
+      const [result] = await pool.execute(
+        'INSERT INTO subjects (name, teacher_id) VALUES (?, ?)',
+        [name, teacherId]
+      );
+      return result.insertId;
+    } catch (error) {
+      console.error('Database error in addSubject:', error);
+      throw new Error(`Failed to add subject: ${error.message}`);
+    }
+  }
+
+  static async deleteSubject(subjectId) {
+    try {
+      await pool.execute('DELETE FROM subjects WHERE id = ?', [subjectId]);
+    } catch (error) {
+      console.error('Database error in deleteSubject:', error);
+      throw new Error(`Failed to delete subject: ${error.message}`);
     }
   }
 }
