@@ -23,12 +23,8 @@ async function initializeData() {
     await loadSectionsFromAPI();
     console.log('Sections loaded:', sections);
     await loadCustomInputsFromAPI();
-    // Load all students from all sections
-    if (sections.length > 0) {
-      for (const section of sections) {
-        await loadStudentsFromAPI(section.id);
-      }
-    }
+    // Load all students at once to avoid duplicates
+    await loadAllStudentsFromAPI();
     console.log('All students loaded:', students);
     console.log('Students by sectionId:', students.reduce((acc, s) => {
       acc[s.sectionId] = (acc[s.sectionId] || 0) + 1;
@@ -607,6 +603,19 @@ async function loadStudentsFromAPI(sectionId) {
     students.push(...studentsWithSectionId);
   } catch (error) {
     console.error('Error loading students:', error);
+    throw error;
+  }
+}
+
+async function loadAllStudentsFromAPI() {
+  try {
+    const response = await fetch('/students', {
+      credentials: 'include'
+    });
+    if (!response.ok) throw new Error('Failed to load all students');
+    students = await response.json();
+  } catch (error) {
+    console.error('Error loading all students:', error);
     throw error;
   }
 }

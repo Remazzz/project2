@@ -450,7 +450,8 @@ class Database {
   static async getStudentsBySection(sectionId) {
     try {
       const [rows] = await pool.execute(`
-        SELECT s.*, sg.status, sg.final_grade, sg.letter_grade
+        SELECT DISTINCT s.id, s.name, s.section_id, s.created_at,
+               sg.status, sg.final_grade, sg.letter_grade
         FROM students s
         LEFT JOIN student_grades sg ON s.id = sg.student_id
         WHERE s.section_id = ?
