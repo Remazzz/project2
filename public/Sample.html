@@ -62,7 +62,7 @@
         <div class="subjects-section">
           <div class="subjects-header">
             <h3 class="subjects-title">Subjects</h3>
-            <button type="button" class="btn-icon-small" id="addSubjectBtn" title="Add Subject">
+            <button type="button" class="btn-icon-small teacher-only" id="addSubjectBtn" title="Add Subject">
               <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
                 <path d="M8 3v10M3 8h10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
               </svg>
@@ -279,7 +279,7 @@
           </div>
 
           <div class="additional-assessments">
-            <button type="button" class="add-assessment-btn" id="addAssessmentBtn">
+            <button type="button" class="add-assessment-btn teacher-only" id="addAssessmentBtn">
               <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
                 <path d="M10 4v12M4 10h12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
               </svg>
@@ -312,6 +312,8 @@
   </div>
 
   <script>
+    let currentUserRole = null;
+
     async function checkAuth() {
       try {
         const response = await fetch('/api/check-auth', {
@@ -320,11 +322,47 @@
         const data = await response.json();
         if (!data.authenticated) {
           window.location.href = '/login.html';
+        } else {
+          currentUserRole = data.user.role;
+          setupRoleBasedUI(data.user.role);
         }
       } catch (error) {
         console.error('Auth check error:', error);
         window.location.href = '/login.html';
       }
+    }
+
+    function setupRoleBasedUI(role) {
+      const teacherOnlyElements = document.querySelectorAll('.teacher-only');
+      const adminOnlyElements = document.querySelectorAll('.admin-only');
+
+      if (role === 'student') {
+        // Hide all teacher/admin features for students
+        teacherOnlyElements.forEach(el => el.style.display = 'none');
+        adminOnlyElements.forEach(el => el.style.display = 'none');
+
+        // Hide the entire content area (grading form) for students
+        const contentArea = document.querySelector('.content-area');
+        if (contentArea) {
+          contentArea.style.display = 'none';
+        }
+
+        // Hide the sidebar for students
+        const sidebar = document.querySelector('.sidebar');
+        if (sidebar) {
+          sidebar.style.display = 'none';
+        }
+
+        // Adjust main content layout for students
+        const mainContent = document.querySelector('.main-content');
+        if (mainContent) {
+          mainContent.style.gridTemplateColumns = '1fr';
+        }
+      } else if (role === 'teacher') {
+        // Teachers can see teacher features but not admin features
+        adminOnlyElements.forEach(el => el.style.display = 'none');
+      }
+      // Admins can see everything
     }
 
     const logoutBtn = document.getElementById('logoutBtn');

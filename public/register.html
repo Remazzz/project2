@@ -71,16 +71,17 @@
       font-size: 0.95rem;
     }
 
-    input {
+    input, select {
       width: 100%;
       padding: 12px 15px;
       border: 2px solid #e0e0e0;
       border-radius: 10px;
       font-size: 1rem;
       transition: border-color 0.3s ease;
+      background: white;
     }
 
-    input:focus {
+    input:focus, select:focus {
       outline: none;
       border-color: #667eea;
     }
@@ -188,6 +189,15 @@
         <input type="password" id="confirmPassword" name="confirmPassword" required autocomplete="new-password" minlength="6">
       </div>
 
+      <div class="form-group">
+        <label for="role">Role</label>
+        <select id="role" name="role" required>
+          <option value="">Select Role</option>
+          <option value="teacher">Teacher</option>
+          <option value="student">Student</option>
+        </select>
+      </div>
+
       <button type="submit" class="btn-register">Register</button>
     </form>
 
@@ -209,6 +219,7 @@
       const username = document.getElementById('username').value;
       const password = document.getElementById('password').value;
       const confirmPassword = document.getElementById('confirmPassword').value;
+      const role = document.getElementById('role').value;
 
       errorMessage.style.display = 'none';
       successMessage.style.display = 'none';
@@ -233,7 +244,7 @@
           headers: {
             'Content-Type': 'application/json'
           },
-          body: JSON.stringify({ username, password, email, fullName })
+          body: JSON.stringify({ username, password, email, fullName, role })
         });
 
         const data = await response.json();

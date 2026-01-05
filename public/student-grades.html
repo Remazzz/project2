@@ -7,7 +7,7 @@
   <link rel="stylesheet" href="../src/StudentGrades.css">
   <style>
     body {
-      background: linear-gradient(135deg, rgba(30, 41, 59, 0.95) 0%, rgba(15, 23, 42, 0.98) 100%), url('Background.jpg') center/cover no-repeat fixed;
+      background: linear-gradient(135deg, rgba(30, 41, 59, 0.95) 0%, rgba(15, 23, 42, 0.98) 100%), url('/public/Background.jpg') center/cover no-repeat fixed;
       background-attachment: fixed;
     }
   </style>
@@ -16,7 +16,7 @@
   <div class="page-container">
     <header class="page-header">
       <div class="header-left">
-        <img src="Logo.jpg" alt="School Logo" class="school-logo">
+        <img src="/public/Logo.jpg" alt="School Logo" class="school-logo">
       </div>
       <div class="header-center">
         <h1 class="page-title">Student Grade Report</h1>
@@ -68,13 +68,22 @@
         </div>
 
         <div class="grades-table-wrapper" id="gradesContainer">
-          <p class="no-data-message">Select a student to view grades</p>
+          <p class="no-data-message">Loading student grades...</p>
         </div>
       </div>
     </main>
   </div>
 
+  <script src="../src/subjects.js"></script>
+
   <script>
+    let currentUserRole = null;
+    let currentUserId = null;
+
+    // Initialize theme on page load
+    const savedTheme = localStorage.getItem('theme') || 'light';
+    document.documentElement.setAttribute('data-theme', savedTheme);
+
     async function checkAuth() {
       try {
         const response = await fetch('/api/check-auth', {
@@ -83,10 +92,61 @@
         const data = await response.json();
         if (!data.authenticated) {
           window.location.href = '/login.html';
+        } else {
+          currentUserRole = data.user.role;
+          currentUserId = data.user.id;
+
+          // Load appropriate script based on user role, then setup UI
+          await loadRoleBasedScript(data.user.role);
+          setupRoleBasedUI(data.user.role);
         }
       } catch (error) {
         console.error('Auth check error:', error);
         window.location.href = '/login.html';
+      }
+    }
+
+    async function loadRoleBasedScript(role) {
+      return new Promise((resolve) => {
+        let scriptSrc;
+        if (role === 'student') {
+          scriptSrc = '../src/StudentGradesStudent.js';
+        } else {
+          scriptSrc = '../src/StudentGrades.js';
+        }
+
+        const script = document.createElement('script');
+        script.src = scriptSrc;
+        script.onload = resolve;
+        document.head.appendChild(script);
+      });
+    }
+
+    function setupRoleBasedUI(role) {
+      const studentSelector = document.querySelector('.student-selector');
+      const backToEditBtn = document.querySelector('.btn-back');
+
+      if (role === 'student') {
+        // Hide student selector for students
+        if (studentSelector) {
+          studentSelector.style.display = 'none';
+        }
+
+        // Hide back to edit button for students
+        if (backToEditBtn) {
+          backToEditBtn.style.display = 'none';
+        }
+
+        // Automatically load student's own grades
+        if (typeof loadStudentGrades === 'function') {
+          loadStudentGrades(currentUserId);
+        }
+      } else {
+        // Teachers and admins can see the selector and back button
+        // Load student list for selection
+        if (typeof initializeStudentView === 'function') {
+          initializeStudentView();
+        }
       }
     }
 
@@ -106,10 +166,18 @@
       });
     }
 
+    // Theme toggle functionality (works for all users)
+    const themeToggle = document.getElementById('themeToggle');
+    if (themeToggle) {
+      themeToggle.addEventListener('click', () => {
+        const currentTheme = document.documentElement.getAttribute('data-theme');
+        const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+        document.documentElement.setAttribute('data-theme', newTheme);
+        localStorage.setItem('theme', newTheme);
+      });
+    }
+
     checkAuth();
   </script>
-
-  <script src="../src/subjects.js"></script>
-  <script src="../src/StudentGrades.js"></script>
 </body>
 </html>

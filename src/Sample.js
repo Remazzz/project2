@@ -613,7 +613,12 @@ async function loadAllStudentsFromAPI() {
       credentials: 'include'
     });
     if (!response.ok) throw new Error('Failed to load all students');
-    students = await response.json();
+    const studentsData = await response.json();
+    // Map section_id to sectionId for consistency with code expectations
+    students = studentsData.map(student => ({
+      ...student,
+      sectionId: student.section_id
+    }));
   } catch (error) {
     console.error('Error loading all students:', error);
     throw error;

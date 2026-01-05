@@ -82,17 +82,51 @@ function requireAuth(req, res, next) {
   }
 }
 
+// Role-based authorization middleware
+function requireRole(allowedRoles) {
+  return (req, res, next) => {
+    if (!req.session || !req.session.role) {
+      return res.status(401).json({
+        error: 'Unauthorized',
+        message: 'Please login to access this resource'
+      });
+    }
+
+    if (!allowedRoles.includes(req.session.role)) {
+      return res.status(403).json({
+        error: 'Forbidden',
+        message: 'You do not have permission to access this resource'
+      });
+    }
+
+    next();
+  };
+}
+
+// Specific role middleware
+const requireAdmin = requireRole(['admin']);
+const requireTeacher = requireRole(['admin', 'teacher']);
+const requireStudent = requireRole(['student']);
+
 // API Routes with error handling
 
 // Authentication Routes
 app.post('/api/register', async (req, res) => {
   try {
-    const { username, password, email, fullName } = req.body;
+    const { username, password, email, fullName, role } = req.body;
 
-    if (!username || !password || !email || !fullName) {
+    if (!username || !password || !email || !fullName || !role) {
       return res.status(400).json({
         error: 'Missing required fields',
-        message: 'Please provide username, password, email, and full name'
+        message: 'Please provide username, password, email, full name, and role'
+      });
+    }
+
+    // Validate role
+    if (!['teacher', 'student'].includes(role)) {
+      return res.status(400).json({
+        error: 'Invalid role',
+        message: 'Role must be either teacher or student'
       });
     }
 
@@ -112,8 +146,8 @@ app.post('/api/register', async (req, res) => {
       });
     }
 
-    const userId = await Database.createUser(username, password, email, fullName);
-    console.log(`New user registered: ${username} (ID: ${userId})`);
+    const userId = await Database.createUser(username, password, email, fullName, role);
+    console.log(`New user registered: ${username} (Role: ${role}, ID: ${userId})`);
 
     res.json({
       success: true,
@@ -222,7 +256,7 @@ app.get('/api/check-auth', (req, res) => {
 });
 
 // Get all sections
-app.get('/sections', requireAuth, async (req, res) => {
+app.get('/sections', requireTeacher, async (req, res) => {
   try {
     console.log('📋 Fetching sections...');
     const sections = await Database.getSections();
@@ -230,7 +264,7 @@ app.get('/sections', requireAuth, async (req, res) => {
     res.json(sections);
   } catch (error) {
     console.error('❌ Error fetching sections:', error.message);
-    res.status(500).json({ 
+    res.status(500).json({
       error: 'Failed to fetch sections',
       message: 'Make sure XAMPP MySQL is running'
     });
@@ -238,7 +272,7 @@ app.get('/sections', requireAuth, async (req, res) => {
 });
 
 // Add new section
-app.post('/sections', requireAuth, async (req, res) => {
+app.post('/sections', requireTeacher, async (req, res) => {
   try {
     const { name } = req.body;
     console.log(`📝 Adding new section: ${name}`);
@@ -247,15 +281,15 @@ app.post('/sections', requireAuth, async (req, res) => {
     res.json({ id: sectionId, name, message: 'Section added successfully' });
   } catch (error) {
     console.error('❌ Error adding section:', error.message);
-    res.status(500).json({ 
+    res.status(500).json({
       error: 'Failed to add section',
-      message: error.message 
+      message: error.message
     });
   }
 });
 
 // Get all students
-app.get('/students', requireAuth, async (req, res) => {
+app.get('/students', requireTeacher, async (req, res) => {
   try {
     console.log('👥 Fetching all students...');
     const allStudents = await Database.getAllStudents();
@@ -271,7 +305,7 @@ app.get('/students', requireAuth, async (req, res) => {
 });
 
 // Get students by section
-app.get('/students/:sectionId', requireAuth, async (req, res) => {
+app.get('/students/:sectionId', requireTeacher, async (req, res) => {
   try {
     const { sectionId } = req.params;
     console.log(`👥 Fetching students for section ${sectionId}...`);
@@ -288,7 +322,7 @@ app.get('/students/:sectionId', requireAuth, async (req, res) => {
 });
 
 // Add new student
-app.post('/students', requireAuth, async (req, res) => {
+app.post('/students', requireTeacher, async (req, res) => {
   try {
     const { name, sectionId } = req.body;
     console.log(`👤 Adding new student: ${name} to section ${sectionId}`);
@@ -305,7 +339,7 @@ app.post('/students', requireAuth, async (req, res) => {
 });
 
 // Delete student
-app.delete('/students/:studentId', requireAuth, async (req, res) => {
+app.delete('/students/:studentId', requireTeacher, async (req, res) => {
   try {
     const { studentId } = req.params;
     console.log(`🗑️  Deleting student ID: ${studentId}`);
@@ -377,19 +411,31 @@ app.get('/grades/:studentId', requireAuth, async (req, res) => {
     const { studentId } = req.params;
     console.log(`📊 Fetching grades for student ID: ${studentId}`);
     const gradesData = await Database.getStudentGrades(studentId);
+
+    // For student users, also fetch their own information
+    let studentInfo = null;
+    if (req.session.role === 'student') {
+      studentInfo = await Database.getStudentByUserId(req.session.userId);
+    }
+
+    const responseData = {
+      ...gradesData,
+      student: studentInfo
+    };
+
     console.log(`✅ Grades fetched for student ${studentId}`);
-    res.json(gradesData);
+    res.json(responseData);
   } catch (error) {
     console.error('❌ Error fetching grades:', error.message);
-    res.status(500).json({ 
+    res.status(500).json({
       error: 'Failed to fetch grades',
-      message: error.message 
+      message: error.message
     });
   }
 });
 
 // Save student grades
-app.post('/grades', requireAuth, async (req, res) => {
+app.post('/grades', requireTeacher, async (req, res) => {
   try {
     const { studentId, subjectId, ...gradesData } = req.body;
     console.log(`💾 Saving grades for student ID: ${studentId}, subject ID: ${subjectId}`);
@@ -406,7 +452,7 @@ app.post('/grades', requireAuth, async (req, res) => {
 });
 
 // Delete student grade for specific subject
-app.delete('/grades/:studentId/:subjectId', requireAuth, async (req, res) => {
+app.delete('/grades/:studentId/:subjectId', requireTeacher, async (req, res) => {
   try {
     const { studentId, subjectId } = req.params;
     console.log(`🗑️  Deleting grades for student ID: ${studentId}, subject ID: ${subjectId}`);
@@ -422,8 +468,25 @@ app.delete('/grades/:studentId/:subjectId', requireAuth, async (req, res) => {
   }
 });
 
+// Get student's own grades (for student users)
+app.get('/my-grades/:studentId', requireStudent, async (req, res) => {
+  try {
+    const { studentId } = req.params;
+    console.log(`📊 Student fetching their own grades for student ID: ${studentId}`);
+    const gradesData = await Database.getStudentGrades(studentId);
+    console.log(`✅ Grades fetched for student ${studentId}`);
+    res.json(gradesData);
+  } catch (error) {
+    console.error('❌ Error fetching student grades:', error.message);
+    res.status(500).json({
+      error: 'Failed to fetch grades',
+      message: error.message
+    });
+  }
+});
+
 // Get all subjects
-app.get('/subjects', requireAuth, async (req, res) => {
+app.get('/subjects', requireTeacher, async (req, res) => {
   try {
     console.log('📚 Fetching subjects...');
     const subjects = await Database.getSubjects();
@@ -439,7 +502,7 @@ app.get('/subjects', requireAuth, async (req, res) => {
 });
 
 // Add new subject
-app.post('/subjects', requireAuth, async (req, res) => {
+app.post('/subjects', requireTeacher, async (req, res) => {
   try {
     const { name, teacherId } = req.body;
     console.log(`📝 Adding new subject: ${name}`);
@@ -456,7 +519,7 @@ app.post('/subjects', requireAuth, async (req, res) => {
 });
 
 // Delete subject
-app.delete('/subjects/:subjectId', requireAuth, async (req, res) => {
+app.delete('/subjects/:subjectId', requireTeacher, async (req, res) => {
   try {
     const { subjectId } = req.params;
     console.log(`🗑️  Deleting subject ID: ${subjectId}`);
@@ -505,6 +568,14 @@ app.get('/login.html', (req, res) => {
 
 app.get('/register.html', (req, res) => {
   res.sendFile(path.join(__dirname, '..', 'public', 'register.html'));
+});
+
+app.get('/student-grades.html', (req, res) => {
+  if (req.session && req.session.userId) {
+    res.sendFile(path.join(__dirname, '..', 'public', 'student-grades.html'));
+  } else {
+    res.redirect('/login.html');
+  }
 });
 
 // Handle 404 errors

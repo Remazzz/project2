@@ -212,7 +212,9 @@
             successMessage.textContent = 'Login successful! Redirecting...';
             successMessage.style.display = 'block';
             setTimeout(() => {
-              if (data.user.role === 'admin') {
+            if (data.user.role === 'admin' || data.user.role === 'teacher') {
+                window.location.href = '/Sample.html';
+              } else if (data.user.role === 'student') {
                 window.location.href = '/student-grades.html';
               } else {
                 window.location.href = '/Sample.html';

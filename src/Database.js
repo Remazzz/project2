@@ -358,7 +358,7 @@ class Database {
   }
 
   // Authentication
-  static async createUser(username, password, email, fullName, role = 'teacher') {
+  static async createUser(username, password, email, fullName, role = 'student') {
     try {
       const bcrypt = require('bcryptjs');
       const hashedPassword = await bcrypt.hash(password, 10);
@@ -467,7 +467,7 @@ class Database {
   static async getAllStudents() {
     try {
       const [rows] = await pool.execute(`
-        SELECT DISTINCT s.id, s.name, s.section_id, s.created_at
+        SELECT DISTINCT s.id, s.name, s.section_id, s.user_id, s.created_at
         FROM students s
         ORDER BY s.name
       `);
@@ -475,6 +475,21 @@ class Database {
     } catch (error) {
       console.error('Database error in getAllStudents:', error);
       throw new Error(`Failed to get all students: ${error.message}`);
+    }
+  }
+
+  static async getStudentByUserId(userId) {
+    try {
+      const [rows] = await pool.execute(`
+        SELECT s.*, sec.name as section_name
+        FROM students s
+        LEFT JOIN sections sec ON s.section_id = sec.id
+        WHERE s.user_id = ?
+      `, [userId]);
+      return rows[0] || null;
+    } catch (error) {
+      console.error('Database error in getStudentByUserId:', error);
+      throw new Error(`Failed to get student by user ID: ${error.message}`);
     }
   }
 
@@ -499,6 +514,8 @@ class Database {
       throw new Error(`Failed to delete student: ${error.message}`);
     }
   }
+
+
 
   // Custom Inputs
   static async getCustomInputs() {
