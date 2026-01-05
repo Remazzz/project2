@@ -308,6 +308,43 @@
           </div>
         </form>
       </section>
+
+      <!-- Add Student Modal -->
+      <div id="addStudentModal" class="modal-overlay" style="display: none;">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h3 class="modal-title">Add Student to Section</h3>
+            <button type="button" class="modal-close-btn" id="closeModalBtn" aria-label="Close modal">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </button>
+          </div>
+
+          <div class="modal-search">
+            <div class="search-container">
+              <svg class="search-icon" width="20" height="20" viewBox="0 0 20 20" fill="none">
+                <path d="M9 17A8 8 0 1 0 9 1a8 8 0 0 0 0 16zM18 18l-4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              <input type="text" class="search-input" id="modalSearchInput" placeholder="Search students...">
+              <button type="button" class="search-btn" id="modalSearchBtn">
+                <svg width="16" height="16" viewBox="0 0 20 20" fill="none">
+                  <path d="M9 17A8 8 0 1 0 9 1a8 8 0 0 0 0 16zM18 18l-4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <div class="modal-student-list" id="modalStudentList">
+            <!-- Student items will be populated here -->
+          </div>
+
+          <div class="modal-footer">
+            <button type="button" class="btn btn-cancel" id="cancelModalBtn">Cancel</button>
+            <button type="button" class="btn btn-add" id="addSelectedStudentBtn" disabled>Add Student</button>
+          </div>
+        </div>
+      </div>
     </main>
   </div>
 

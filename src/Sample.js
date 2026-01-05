@@ -101,6 +101,45 @@ function setupEventListeners() {
   if (deleteGradeBtn) {
     deleteGradeBtn.addEventListener('click', deleteGrade);
   }
+
+  // Modal event listeners
+  const modalSearchInput = document.getElementById('modalSearchInput');
+  if (modalSearchInput) {
+    modalSearchInput.addEventListener('input', handleModalSearch);
+  }
+
+  const modalSearchBtn = document.getElementById('modalSearchBtn');
+  if (modalSearchBtn) {
+    modalSearchBtn.addEventListener('click', () => {
+      const searchTerm = document.getElementById('modalSearchInput').value;
+      populateModalStudentList(searchTerm);
+    });
+  }
+
+  const modalCloseBtn = document.getElementById('closeModalBtn');
+  if (modalCloseBtn) {
+    modalCloseBtn.addEventListener('click', closeModal);
+  }
+
+  const cancelModalBtn = document.getElementById('cancelModalBtn');
+  if (cancelModalBtn) {
+    cancelModalBtn.addEventListener('click', closeModal);
+  }
+
+  const addSelectedStudentBtn = document.getElementById('addSelectedStudentBtn');
+  if (addSelectedStudentBtn) {
+    addSelectedStudentBtn.addEventListener('click', addSelectedStudentToSection);
+  }
+
+  // Close modal when clicking outside
+  const modal = document.getElementById('addStudentModal');
+  if (modal) {
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) {
+        closeModal();
+      }
+    });
+  }
 }
 
 function toggleTheme() {
@@ -195,21 +234,24 @@ function loadStudents() {
 }
 
 async function addStudent() {
+  console.log('addStudent called, currentSectionId:', currentSectionId);
   if (!currentSectionId) {
     alert('Please select a section first');
     return;
   }
 
-  const studentName = prompt('Enter student name:');
-  if (!studentName || studentName.trim() === '') return;
+  // Open the modal
+  const modal = document.getElementById('addStudentModal');
+  if (modal) {
+    modal.style.display = 'flex';
+    populateModalStudentList();
+    console.log('Modal opened and populated');
 
-  try {
-    const result = await addStudentToAPI(studentName.trim(), currentSectionId);
-    students.push(result);
-    loadStudents();
-    alert('Student added successfully!');
-  } catch (error) {
-    alert('Error adding student: ' + error.message);
+    // Ensure the add button is disabled when modal opens
+    const addBtn = document.getElementById('addSelectedStudentBtn');
+    if (addBtn) {
+      addBtn.disabled = true;
+    }
   }
 }
 
@@ -329,6 +371,105 @@ function handleSearch(event) {
       item.style.display = 'none';
     }
   });
+}
+
+function handleModalSearch(event) {
+  const searchTerm = event.target.value;
+  populateModalStudentList(searchTerm);
+}
+
+function populateModalStudentList(searchTerm = '') {
+  const modalStudentList = document.getElementById('modalStudentList');
+  if (!modalStudentList) return;
+
+  // Filter students with unassigned sections (sectionId null or undefined)
+  const unassignedStudents = students.filter(s => s.sectionId == null || s.sectionId == undefined);
+
+  // Apply search filter
+  const filteredStudents = unassignedStudents.filter(student =>
+    student.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  if (filteredStudents.length === 0) {
+    modalStudentList.innerHTML = '<div style="padding: 1rem; text-align: center; color: var(--text-secondary);">No unassigned students found</div>';
+    return;
+  }
+
+  modalStudentList.innerHTML = filteredStudents.map(student => `
+    <div class="modal-student-item" data-student-id="${student.id}" onclick="selectModalStudent(${student.id})">
+      <div class="student-avatar"></div>
+      <span class="student-name">${student.name}</span>
+    </div>
+  `).join('');
+}
+
+let selectedModalStudentId = null;
+
+function selectModalStudent(studentId) {
+  selectedModalStudentId = studentId;
+
+  // Remove active class from all modal student items
+  document.querySelectorAll('.modal-student-item').forEach(item => {
+    item.classList.remove('active');
+  });
+
+  // Add active class to selected student
+  const selectedItem = document.querySelector(`.modal-student-item[data-student-id="${studentId}"]`);
+  if (selectedItem) {
+    selectedItem.classList.add('active');
+  }
+
+  // Enable/disable the add button based on selection
+  const addBtn = document.getElementById('addSelectedStudentBtn');
+  if (addBtn) {
+    addBtn.disabled = !selectedModalStudentId;
+  }
+}
+
+function closeModal() {
+  const modal = document.getElementById('addStudentModal');
+  if (modal) {
+    modal.style.display = 'none';
+  }
+  selectedModalStudentId = null;
+
+  // Disable the add button when modal is closed
+  const addBtn = document.getElementById('addSelectedStudentBtn');
+  if (addBtn) {
+    addBtn.disabled = true;
+  }
+}
+
+async function addSelectedStudentToSection() {
+  if (!selectedModalStudentId) {
+    alert('Please select a student from the list');
+    return;
+  }
+
+  if (!currentSectionId) {
+    alert('No section selected');
+    return;
+  }
+
+  try {
+    await addStudentToSectionAPI(selectedModalStudentId, currentSectionId);
+
+    // Update the student's sectionId in the local array
+    const student = students.find(s => s.id === selectedModalStudentId);
+    if (student) {
+      student.sectionId = currentSectionId;
+    }
+
+    // Close the modal
+    closeModal();
+
+    // Refresh the student list
+    loadStudents();
+
+    alert('Student added to section successfully!');
+  } catch (error) {
+    alert('Error adding student to section: ' + error.message);
+  }
 }
 
 function addCustomInput() {
@@ -783,6 +924,25 @@ async function addSubjectToAPI(subjectName, teacherId = null) {
     return result;
   } catch (error) {
     console.error('Error adding subject:', error);
+    throw error;
+  }
+}
+
+async function addStudentToSectionAPI(studentId, sectionId) {
+  try {
+    const response = await fetch('/students/add-to-section', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      credentials: 'include',
+      body: JSON.stringify({ studentId, sectionId })
+    });
+    if (!response.ok) throw new Error('Failed to add student to section');
+    const result = await response.json();
+    return result;
+  } catch (error) {
+    console.error('Error adding student to section:', error);
     throw error;
   }
 }
