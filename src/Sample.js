@@ -57,7 +57,7 @@ function setupEventListeners() {
 
   const addStudentBtn = document.getElementById('addStudentBtn');
   if (addStudentBtn) {
-    addStudentBtn.addEventListener('click', addStudent);
+    addStudentBtn.addEventListener('click', changeSection);
   }
 
   const searchInput = document.getElementById('searchInput');
@@ -102,43 +102,28 @@ function setupEventListeners() {
     deleteGradeBtn.addEventListener('click', deleteGrade);
   }
 
-  // Modal event listeners
-  const modalSearchInput = document.getElementById('modalSearchInput');
-  if (modalSearchInput) {
-    modalSearchInput.addEventListener('input', handleModalSearch);
+  // Change section event listeners
+  const sectionSearchInput = document.getElementById('sectionSearchInput');
+  if (sectionSearchInput) {
+    sectionSearchInput.addEventListener('input', handleSectionSearch);
   }
 
-  const modalSearchBtn = document.getElementById('modalSearchBtn');
-  if (modalSearchBtn) {
-    modalSearchBtn.addEventListener('click', () => {
-      const searchTerm = document.getElementById('modalSearchInput').value;
-      populateModalStudentList(searchTerm);
+  const sectionSearchBtn = document.getElementById('sectionSearchBtn');
+  if (sectionSearchBtn) {
+    sectionSearchBtn.addEventListener('click', () => {
+      const searchTerm = document.getElementById('sectionSearchInput').value;
+      populateSectionStudentList(searchTerm);
     });
   }
 
-  const modalCloseBtn = document.getElementById('closeModalBtn');
-  if (modalCloseBtn) {
-    modalCloseBtn.addEventListener('click', closeModal);
+  const cancelSectionBtn = document.getElementById('cancelSectionBtn');
+  if (cancelSectionBtn) {
+    cancelSectionBtn.addEventListener('click', closeSection);
   }
 
-  const cancelModalBtn = document.getElementById('cancelModalBtn');
-  if (cancelModalBtn) {
-    cancelModalBtn.addEventListener('click', closeModal);
-  }
-
-  const addSelectedStudentBtn = document.getElementById('addSelectedStudentBtn');
-  if (addSelectedStudentBtn) {
-    addSelectedStudentBtn.addEventListener('click', addSelectedStudentToSection);
-  }
-
-  // Close modal when clicking outside
-  const modal = document.getElementById('addStudentModal');
-  if (modal) {
-    modal.addEventListener('click', (e) => {
-      if (e.target === modal) {
-        closeModal();
-      }
-    });
+  const changeSectionBtn = document.getElementById('changeSectionBtn');
+  if (changeSectionBtn) {
+    changeSectionBtn.addEventListener('click', changeSelectedStudentSection);
   }
 }
 
@@ -233,24 +218,21 @@ function loadStudents() {
   console.log('studentsList.innerHTML updated');
 }
 
-async function addStudent() {
-  console.log('addStudent called, currentSectionId:', currentSectionId);
-  if (!currentSectionId) {
-    alert('Please select a section first');
-    return;
-  }
+async function changeSection() {
+  console.log('changeSection called');
 
-  // Open the modal
-  const modal = document.getElementById('addStudentModal');
-  if (modal) {
-    modal.style.display = 'flex';
-    populateModalStudentList();
-    console.log('Modal opened and populated');
+  // Show the change section section
+  const section = document.getElementById('changeSectionSection');
+  if (section) {
+    section.style.display = 'block';
+    populateSectionStudentList();
+    populateSectionSelect();
+    console.log('Change section section shown and populated');
 
-    // Ensure the add button is disabled when modal opens
-    const addBtn = document.getElementById('addSelectedStudentBtn');
-    if (addBtn) {
-      addBtn.disabled = true;
+    // Ensure the change button is disabled when section opens
+    const changeBtn = document.getElementById('changeSectionBtn');
+    if (changeBtn) {
+      changeBtn.disabled = true;
     }
   }
 }
@@ -382,16 +364,16 @@ function populateModalStudentList(searchTerm = '') {
   const modalStudentList = document.getElementById('modalStudentList');
   if (!modalStudentList) return;
 
-  // Filter students with unassigned sections (sectionId null or undefined)
-  const unassignedStudents = students.filter(s => s.sectionId == null || s.sectionId == undefined);
+  // Show all students for section change
+  const allStudents = students;
 
   // Apply search filter
-  const filteredStudents = unassignedStudents.filter(student =>
+  const filteredStudents = allStudents.filter(student =>
     student.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   if (filteredStudents.length === 0) {
-    modalStudentList.innerHTML = '<div style="padding: 1rem; text-align: center; color: var(--text-secondary);">No unassigned students found</div>';
+    modalStudentList.innerHTML = '<div style="padding: 1rem; text-align: center; color: var(--text-secondary);">No students found</div>';
     return;
   }
 
@@ -401,6 +383,22 @@ function populateModalStudentList(searchTerm = '') {
       <span class="student-name">${student.name}</span>
     </div>
   `).join('');
+}
+
+function populateModalSectionSelect() {
+  const modalSectionSelect = document.getElementById('modalSectionSelect');
+  if (!modalSectionSelect) return;
+
+  modalSectionSelect.innerHTML = '<option value="">Select Section</option>' +
+    sections.map(section => {
+      let displayName = section.name;
+      if (section.id === 1) {
+        displayName = 'Assign Section';
+      } else if (section.id === 2) {
+        displayName = 'Section A';
+      }
+      return `<option value="${section.id}">${displayName}</option>`;
+    }).join('');
 }
 
 let selectedModalStudentId = null;
@@ -446,18 +444,21 @@ async function addSelectedStudentToSection() {
     return;
   }
 
-  if (!currentSectionId) {
-    alert('No section selected');
+  const modalSectionSelect = document.getElementById('modalSectionSelect');
+  const newSectionId = parseInt(modalSectionSelect.value);
+
+  if (!newSectionId) {
+    alert('Please select a section');
     return;
   }
 
   try {
-    await addStudentToSectionAPI(selectedModalStudentId, currentSectionId);
+    await addStudentToSectionAPI(selectedModalStudentId, newSectionId);
 
     // Update the student's sectionId in the local array
     const student = students.find(s => s.id === selectedModalStudentId);
     if (student) {
-      student.sectionId = currentSectionId;
+      student.sectionId = newSectionId;
     }
 
     // Close the modal
@@ -466,9 +467,9 @@ async function addSelectedStudentToSection() {
     // Refresh the student list
     loadStudents();
 
-    alert('Student added to section successfully!');
+    alert('Student section changed successfully!');
   } catch (error) {
-    alert('Error adding student to section: ' + error.message);
+    alert('Error changing student section: ' + error.message);
   }
 }
 
@@ -944,5 +945,124 @@ async function addStudentToSectionAPI(studentId, sectionId) {
   } catch (error) {
     console.error('Error adding student to section:', error);
     throw error;
+  }
+}
+
+// Change section functions
+function handleSectionSearch(event) {
+  const searchTerm = event.target.value;
+  populateSectionStudentList(searchTerm);
+}
+
+function populateSectionStudentList(searchTerm = '') {
+  const sectionStudentList = document.getElementById('changeSectionStudentList');
+  if (!sectionStudentList) return;
+
+  // Show all students for section change
+  const allStudents = students;
+
+  // Apply search filter
+  const filteredStudents = allStudents.filter(student =>
+    student.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  if (filteredStudents.length === 0) {
+    sectionStudentList.innerHTML = '<div style="padding: 1rem; text-align: center; color: var(--text-secondary);">No students found</div>';
+    return;
+  }
+
+  sectionStudentList.innerHTML = filteredStudents.map(student => `
+    <div class="section-student-item" data-student-id="${student.id}" onclick="selectSectionStudent(${student.id})">
+      <div class="student-avatar"></div>
+      <span class="student-name">${student.name}</span>
+    </div>
+  `).join('');
+}
+
+function populateSectionSelect() {
+  const sectionSelect = document.getElementById('changeSectionSelect');
+  if (!sectionSelect) return;
+
+  sectionSelect.innerHTML = '<option value="">Select Section</option>' +
+    sections.map(section => {
+      let displayName = section.name;
+      if (section.id === 1) {
+        displayName = 'Assign Section';
+      } else if (section.id === 2) {
+        displayName = 'Section A';
+      }
+      return `<option value="${section.id}">${displayName}</option>`;
+    }).join('');
+}
+
+let selectedSectionStudentId = null;
+
+function selectSectionStudent(studentId) {
+  selectedSectionStudentId = studentId;
+
+  // Remove active class from all section student items
+  document.querySelectorAll('.section-student-item').forEach(item => {
+    item.classList.remove('active');
+  });
+
+  // Add active class to selected student
+  const selectedItem = document.querySelector(`.section-student-item[data-student-id="${studentId}"]`);
+  if (selectedItem) {
+    selectedItem.classList.add('active');
+  }
+
+  // Enable/disable the change button based on selection
+  const changeBtn = document.getElementById('changeSectionBtn');
+  if (changeBtn) {
+    changeBtn.disabled = !selectedSectionStudentId;
+  }
+}
+
+function closeSection() {
+  const section = document.getElementById('changeSectionSection');
+  if (section) {
+    section.style.display = 'none';
+  }
+  selectedSectionStudentId = null;
+
+  // Disable the change button when section is closed
+  const changeBtn = document.getElementById('changeSectionBtn');
+  if (changeBtn) {
+    changeBtn.disabled = true;
+  }
+}
+
+async function changeSelectedStudentSection() {
+  if (!selectedSectionStudentId) {
+    alert('Please select a student from the list');
+    return;
+  }
+
+  const sectionSelect = document.getElementById('changeSectionSelect');
+  const newSectionId = parseInt(sectionSelect.value);
+
+  if (!newSectionId) {
+    alert('Please select a section');
+    return;
+  }
+
+  try {
+    await addStudentToSectionAPI(selectedSectionStudentId, newSectionId);
+
+    // Update the student's sectionId in the local array
+    const student = students.find(s => s.id === selectedSectionStudentId);
+    if (student) {
+      student.sectionId = newSectionId;
+    }
+
+    // Close the section
+    closeSection();
+
+    // Refresh the student list
+    loadStudents();
+
+    alert('Student section changed successfully!');
+  } catch (error) {
+    alert('Error changing student section: ' + error.message);
   }
 }

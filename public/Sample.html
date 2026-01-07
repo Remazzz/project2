@@ -50,7 +50,7 @@
                 <path d="M8 3v10M3 8h10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
               </svg>
             </button>
-            <button type="button" class="btn-icon" id="addStudentBtn" title="Add Student">
+            <button type="button" class="btn-icon teacher-only" id="addStudentBtn" title="Change Section">
               <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
                 <path d="M8 7a2.5 2.5 0 100-5 2.5 2.5 0 000 5zM13 14a5 5 0 00-10 0" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
                 <path d="M12 4v4M14 6h-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
@@ -81,6 +81,48 @@
 
         <ul class="students-list" id="studentsList">
         </ul>
+
+        <!-- Change Section Section -->
+        <div id="changeSectionSection" class="change-section-section" style="display: none;">
+          <div class="form-section-header">
+            <h2 class="section-title">Change Student Section</h2>
+          </div>
+
+          <div class="change-section-search">
+            <div class="search-container">
+              <svg class="search-icon" width="20" height="20" viewBox="0 0 20 20" fill="none">
+                <path d="M9 17A8 8 0 1 0 9 1a8 8 0 0 0 0 16zM18 18l-4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              <input type="text" class="search-input" id="sectionSearchInput" placeholder="Search students...">
+              <button type="button" class="search-btn" id="sectionSearchBtn">
+                <svg width="16" height="16" viewBox="0 0 20 20" fill="none">
+                  <path d="M9 17A8 8 0 1 0 9 1a8 8 0 0 0 0 16zM18 18l-4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <div class="change-section-student-list" id="sectionStudentList">
+            <!-- Student items will be populated here -->
+          </div>
+
+          <div class="form-section-header">
+            <h3 class="section-title">Select New Section</h3>
+          </div>
+          <div class="form-row">
+            <div class="form-field">
+              <label for="sectionSelectDropdown" class="form-label">Section:</label>
+              <select id="sectionSelectDropdown" class="section-select">
+                <option value="">Select Section</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="change-section-actions">
+            <button type="button" class="btn btn-cancel" id="cancelSectionBtn">Cancel</button>
+            <button type="button" class="btn btn-add" id="changeSectionBtn" disabled>Change Section</button>
+          </div>
+        </div>
       </aside>
 
       <section class="content-area">
@@ -308,43 +350,6 @@
           </div>
         </form>
       </section>
-
-      <!-- Add Student Modal -->
-      <div id="addStudentModal" class="modal-overlay" style="display: none;">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h3 class="modal-title">Add Student to Section</h3>
-            <button type="button" class="modal-close-btn" id="closeModalBtn" aria-label="Close modal">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
-            </button>
-          </div>
-
-          <div class="modal-search">
-            <div class="search-container">
-              <svg class="search-icon" width="20" height="20" viewBox="0 0 20 20" fill="none">
-                <path d="M9 17A8 8 0 1 0 9 1a8 8 0 0 0 0 16zM18 18l-4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
-              <input type="text" class="search-input" id="modalSearchInput" placeholder="Search students...">
-              <button type="button" class="search-btn" id="modalSearchBtn">
-                <svg width="16" height="16" viewBox="0 0 20 20" fill="none">
-                  <path d="M9 17A8 8 0 1 0 9 1a8 8 0 0 0 0 16zM18 18l-4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
-              </button>
-            </div>
-          </div>
-
-          <div class="modal-student-list" id="modalStudentList">
-            <!-- Student items will be populated here -->
-          </div>
-
-          <div class="modal-footer">
-            <button type="button" class="btn btn-cancel" id="cancelModalBtn">Cancel</button>
-            <button type="button" class="btn btn-add" id="addSelectedStudentBtn" disabled>Add Student</button>
-          </div>
-        </div>
-      </div>
     </main>
   </div>
 

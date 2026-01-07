@@ -1,12 +1,13 @@
-# Student Registration Enhancement - TODO List
+# Debug and Fix Change Student Section Functionality
 
-## Completed Tasks
-- [x] Add `createStudentForUser` method to `Database.js` to handle automatic student record creation
-- [x] Modify `/api/register` endpoint in `Server.js` to automatically create student records for users registering as 'student'
-- [x] Assign new students to default section (Section A, id=1) automatically
-- [x] Link student records to user accounts via `user_id` field
+## Issues Identified
+- ID mismatches between HTML and JavaScript
+- Missing X button to close Change Student Section
+- Need to verify section update logic
 
-## Followup Steps
-- [ ] Test student registration to ensure both user and student records are created
-- [ ] Verify the data integrity and relationships between tables
-- [ ] Check that existing functionality still works (teacher registration, login, etc.)
+## Tasks
+- [ ] Fix ID mismatches in JavaScript event listeners
+- [ ] Add X button to HTML for closing Change Student Section
+- [ ] Wire up X button event listener in JavaScript
+- [ ] Verify section change updates UI/state correctly
+- [ ] Test the complete functionality
