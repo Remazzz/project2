@@ -374,6 +374,22 @@ class Database {
     }
   }
 
+  static async createStudentForUser(userId, fullName) {
+    try {
+      // Assign new students to default section (Section A, id=1)
+      const defaultSectionId = 1;
+
+      const [result] = await pool.execute(
+        'INSERT INTO students (name, section_id, user_id) VALUES (?, ?, ?)',
+        [fullName, defaultSectionId, userId]
+      );
+      return result.insertId;
+    } catch (error) {
+      console.error('Database error in createStudentForUser:', error);
+      throw new Error(`Failed to create student record: ${error.message}`);
+    }
+  }
+
   static async getUserByUsername(username) {
     try {
       const [rows] = await pool.execute(

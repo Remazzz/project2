@@ -149,6 +149,18 @@ app.post('/api/register', async (req, res) => {
     const userId = await Database.createUser(username, password, email, fullName, role);
     console.log(`New user registered: ${username} (Role: ${role}, ID: ${userId})`);
 
+    // If the user registered as a student, automatically create a student record
+    if (role === 'student') {
+      try {
+        const studentId = await Database.createStudentForUser(userId, fullName);
+        console.log(`Student record created automatically: ${fullName} (Student ID: ${studentId}, User ID: ${userId})`);
+      } catch (studentError) {
+        console.error('Failed to create student record:', studentError.message);
+        // Don't fail the registration if student record creation fails
+        // The user can still login, but they won't have a student record
+      }
+    }
+
     res.json({
       success: true,
       message: 'Registration successful! You can now login.',

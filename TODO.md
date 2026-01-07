@@ -1,10 +1,12 @@
-# TODO: Modify Add Students Button to Use Modal
+# Student Registration Enhancement - TODO List
 
-## Steps to Complete
+## Completed Tasks
+- [x] Add `createStudentForUser` method to `Database.js` to handle automatic student record creation
+- [x] Modify `/api/register` endpoint in `Server.js` to automatically create student records for users registering as 'student'
+- [x] Assign new students to default section (Section A, id=1) automatically
+- [x] Link student records to user accounts via `user_id` field
 
-- [ ] Modify addStudent function to open modal instead of prompt, check for selected section
-- [ ] Add event listeners for modal interactions (open, close, search, select, add)
-- [ ] Create populateModalStudentList function to display unassigned students with search filtering
-- [ ] Implement selection highlighting and toggle Add Student button based on selection
-- [ ] Update student sectionId after adding and refresh students list
-- [ ] Test the modal functionality
+## Followup Steps
+- [ ] Test student registration to ensure both user and student records are created
+- [ ] Verify the data integrity and relationships between tables
+- [ ] Check that existing functionality still works (teacher registration, login, etc.)
