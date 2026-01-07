@@ -286,8 +286,8 @@ INSERT INTO `custom_inputs` (`id`, `name`, `type`, `weight`, `created_at`) VALUE
 --
 
 INSERT INTO `sections` (`id`, `name`, `created_at`) VALUES
-(1, 'Section A', '2024-12-19 09:30:00'),
-(2, 'Section B', '2024-12-19 09:30:00');
+(1, 'Assign Section', '2024-12-19 09:30:00'),
+(2, 'Section A', '2024-12-19 09:30:00');
 
 --
 -- Dumping data for table `students`

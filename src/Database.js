@@ -139,6 +139,39 @@ async function testConnection() {
         } else {
           console.log('✅ student_grades table structure is correct');
         }
+
+        // Check and update sections data if needed
+        console.log('🔍 Checking sections data...');
+        const [sections] = await connection.execute('SELECT id, name FROM sections ORDER BY id');
+        const currentSections = sections.map(s => ({ id: s.id, name: s.name }));
+        const expectedSections = [
+          { id: 1, name: 'Assign Section' },
+          { id: 2, name: 'Section A' }
+        ];
+
+        let needsUpdate = false;
+        for (const expected of expectedSections) {
+          const current = currentSections.find(s => s.id === expected.id);
+          if (!current || current.name !== expected.name) {
+            needsUpdate = true;
+            break;
+          }
+        }
+
+        if (needsUpdate) {
+          console.log('⚠️  Sections data needs update. Updating...');
+          // Delete existing sections
+          await connection.execute('DELETE FROM sections');
+          // Insert correct sections
+          await connection.execute(`
+            INSERT INTO sections (id, name) VALUES
+            (1, 'Assign Section'),
+            (2, 'Section A')
+          `);
+          console.log('✅ Sections data updated successfully');
+        } else {
+          console.log('✅ Sections data is correct');
+        }
       }
     }
     
@@ -310,8 +343,8 @@ async function createTables(connection) {
     // Insert sections
     await connection.execute(`
       INSERT INTO sections (id, name) VALUES
-      (1, 'Section A'),
-      (2, 'Section B')
+      (1, 'Assign Section'),
+      (2, 'Section A')
     `);
 
     // Insert students
@@ -376,7 +409,7 @@ class Database {
 
   static async createStudentForUser(userId, fullName) {
     try {
-      // Assign new students to default section (Section A, id=1)
+      // Assign new students to default section (Assign Section, id=1)
       const defaultSectionId = 1;
 
       const [result] = await pool.execute(

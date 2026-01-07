@@ -158,9 +158,9 @@ function loadSections() {
     sections.map(section => {
       let displayName = section.name;
       if (section.id === 1) {
-        displayName = 'Section A';
+        displayName = 'Assign Section';
       } else if (section.id === 2) {
-        displayName = 'Section B';
+        displayName = 'Section A';
       }
       return `<option value="${section.id}">${displayName}</option>`;
     }).join('');
