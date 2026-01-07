@@ -1,13 +1,10 @@
-# Debug and Fix Change Student Section Functionality
-
-## Issues Identified
-- ID mismatches between HTML and JavaScript
-- Missing X button to close Change Student Section
-- Need to verify section update logic
+# Fix Change Student Section Functionality
 
 ## Tasks
-- [ ] Fix ID mismatches in JavaScript event listeners
-- [ ] Add X button to HTML for closing Change Student Section
-- [ ] Wire up X button event listener in JavaScript
-- [ ] Verify section change updates UI/state correctly
-- [ ] Test the complete functionality
+- [x] Add `updateStudentSection(studentId, sectionId)` method in Database.js
+- [x] Add new API endpoint `PUT /students/add-to-section` in Server.js
+- [x] Fix HTML ID from `sectionSelectDropdown` to `changeSectionSelect` in Sample.html
+- [x] Fix HTML ID from `sectionStudentList` to `changeSectionStudentList` in Sample.html
+- [x] Add hover effect for students in Change Student Section same as regular student blocks
+- [x] Add scrolling functionality for Change Student Section when there are too many students
+- [x] Test the complete change section functionality

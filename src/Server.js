@@ -367,6 +367,23 @@ app.delete('/students/:studentId', requireTeacher, async (req, res) => {
   }
 });
 
+// Update student section
+app.put('/students/add-to-section', requireTeacher, async (req, res) => {
+  try {
+    const { studentId, sectionId } = req.body;
+    console.log(`🔄 Updating student ${studentId} to section ${sectionId}`);
+    await Database.updateStudentSection(studentId, sectionId);
+    console.log(`✅ Student section updated`);
+    res.json({ message: 'Student section updated successfully' });
+  } catch (error) {
+    console.error('❌ Error updating student section:', error.message);
+    res.status(500).json({
+      error: 'Failed to update student section',
+      message: error.message
+    });
+  }
+});
+
 // Get custom inputs
 app.get('/custom-inputs', requireAuth, async (req, res) => {
   try {

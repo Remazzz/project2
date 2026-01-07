@@ -564,6 +564,18 @@ class Database {
     }
   }
 
+  static async updateStudentSection(studentId, sectionId) {
+    try {
+      await pool.execute(
+        'UPDATE students SET section_id = ? WHERE id = ?',
+        [sectionId, studentId]
+      );
+    } catch (error) {
+      console.error('Database error in updateStudentSection:', error);
+      throw new Error(`Failed to update student section: ${error.message}`);
+    }
+  }
+
 
 
   // Custom Inputs

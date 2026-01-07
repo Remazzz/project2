@@ -932,7 +932,7 @@ async function addSubjectToAPI(subjectName, teacherId = null) {
 async function addStudentToSectionAPI(studentId, sectionId) {
   try {
     const response = await fetch('/students/add-to-section', {
-      method: 'POST',
+      method: 'PUT',
       headers: {
         'Content-Type': 'application/json'
       },
