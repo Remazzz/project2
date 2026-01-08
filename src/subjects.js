@@ -106,7 +106,18 @@ async function addSubject() {
   }
 
   try {
-    await addSubjectToAPI(subjectName.trim());
+    // Get current user info to get teacher ID
+    const authResponse = await fetch('/api/check-auth', {
+      credentials: 'include'
+    });
+    if (!authResponse.ok) throw new Error('Failed to get user info');
+
+    const authData = await authResponse.json();
+    if (!authData.authenticated) throw new Error('Not authenticated');
+
+    const teacherId = authData.user.id;
+
+    await addSubjectToAPI(subjectName.trim(), teacherId);
     loadSubjectsToUI();
     alert('Subject added successfully!');
   } catch (error) {

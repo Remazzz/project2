@@ -88,6 +88,8 @@ CREATE TABLE `student_grades` (
   `quiz1_total` decimal(8,2) DEFAULT 1.00,
   `quiz2_score` decimal(8,2) DEFAULT 0.00,
   `quiz2_total` decimal(8,2) DEFAULT 1.00,
+  `midterm_exam_score` decimal(8,2) DEFAULT 0.00,
+  `midterm_exam_total` decimal(8,2) DEFAULT 1.00,
   `final_exam_score` decimal(8,2) DEFAULT 0.00,
   `final_exam_total` decimal(8,2) DEFAULT 1.00,
   `lab_grade` decimal(5,2) DEFAULT 0.00,

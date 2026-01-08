@@ -529,12 +529,12 @@ function calculateGrade() {
   const labPercentage = labTotal === 0 ? 0 : (labScore / labTotal) * 100;
 
   const grade = (
-    (classParticipation * 0.15) +
+    (classParticipation * 0.40) +
     (attendance * 0.10) +
     (quiz1Percentage * 0.15) +
     (quiz2Percentage * 0.15) +
-    (finalExamPercentage * 0.30) +
-    (labPercentage * 0.15)
+    (finalExamPercentage * 0.10) +
+    (labPercentage * 0.10)
   );
 
   const roundedGrade = Math.round(grade * 100) / 100;
