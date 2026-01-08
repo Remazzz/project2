@@ -203,7 +203,8 @@ function loadStudents() {
   }
 
   if (filteredStudents.length === 0) {
-    studentsList.innerHTML = '<li style="padding: 1rem; text-align: center; color: var(--text-secondary);">No students in this section</li>';
+    const message = currentSectionId === 1 ? 'No students to be assigned' : 'No students in this section';
+    studentsList.innerHTML = `<li style="padding: 1rem; text-align: center; color: var(--text-secondary);">${message}</li>`;
     return;
   }
 
@@ -984,11 +985,9 @@ function populateSectionSelect() {
   if (!sectionSelect) return;
 
   sectionSelect.innerHTML = '<option value="">Select Section</option>' +
-    sections.map(section => {
+    sections.filter(section => section.id !== 1).map(section => {
       let displayName = section.name;
-      if (section.id === 1) {
-        displayName = 'Assign Section';
-      } else if (section.id === 2) {
+      if (section.id === 2) {
         displayName = 'Section A';
       }
       return `<option value="${section.id}">${displayName}</option>`;

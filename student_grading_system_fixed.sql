@@ -311,7 +311,12 @@ INSERT INTO `subjects` (`id`, `name`, `teacher_id`, `created_at`) VALUES
 (1, 'Mathematics', 2, '2024-12-19 09:30:00'),
 (2, 'Science', 2, '2024-12-19 09:30:00'),
 (3, 'English', 2, '2024-12-19 09:30:00'),
-(4, 'History', 2, '2024-12-19 09:30:00');
+(4, 'Filipino', 2, '2024-12-19 09:30:00'),
+(5, 'Araling Panlipunan', 2, '2024-12-19 09:30:00'),
+(6, 'ESP', 2, '2024-12-19 09:30:00'),
+(7, 'MAPEH', 2, '2024-12-19 09:30:00'),
+(8, 'TVE', 2, '2024-12-19 09:30:00'),
+(9, 'Business Math', 2, '2024-12-19 09:30:00');
 
 --
 -- Dumping data for table `custom_inputs`
