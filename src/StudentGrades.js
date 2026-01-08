@@ -166,7 +166,7 @@ function updateStudentInfo(student) {
   if (nameEl) nameEl.textContent = student.name;
   if (idEl) idEl.textContent = `ID: ${student.id}`;
 
-  const section = allStudents.find(s => s.id === student.id)?.sectionId;
+  const section = allStudents.find(s => s.id === student.id)?.section_id;
   if (sectionEl && section) {
     sectionEl.textContent = `Section: ${section}`;
   }

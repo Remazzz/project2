@@ -76,22 +76,33 @@ function showError(message) {
   alert(message);
 }
 
-async function loadStudentGrades(studentId) {
+async function loadStudentGrades(userId) {
   try {
-    // Fetch grades for the student (now includes student info)
-    const response = await fetch(`/grades/${studentId}`, {
+    // First, get the student's own info to get their student ID
+    const studentInfoResponse = await fetch('/api/my-student-info', {
       credentials: 'include'
     });
 
-    if (response.ok) {
-      const gradesData = await response.json();
-      const studentGrades = gradesData.grades || {};
-      const student = gradesData.student;
+    if (!studentInfoResponse.ok) {
+      console.error('Failed to fetch student info');
+      document.getElementById('gradesContainer').innerHTML =
+        '<p class="no-data-message">Failed to load student information. Please try again.</p>';
+      return;
+    }
 
-      // Update student info if available
-      if (student) {
-        updateStudentInfo(student);
-      }
+    const student = await studentInfoResponse.json();
+
+    // Update student info
+    updateStudentInfo(student);
+
+    // Now fetch grades using the actual student ID
+    const gradesResponse = await fetch(`/grades/${student.id}`, {
+      credentials: 'include'
+    });
+
+    if (gradesResponse.ok) {
+      const gradesData = await gradesResponse.json();
+      const studentGrades = gradesData.grades || {};
 
       if (Object.keys(studentGrades).length === 0) {
         document.getElementById('gradesContainer').innerHTML =
@@ -196,8 +207,20 @@ function getSubjectName(subjectId) {
 
 async function downloadGradeReport() {
   try {
-    // Fetch grades for the current student
-    const response = await fetch(`/grades/${currentUserId}`, {
+    // First, get the student's own info to get their student ID
+    const studentInfoResponse = await fetch('/api/my-student-info', {
+      credentials: 'include'
+    });
+
+    if (!studentInfoResponse.ok) {
+      alert('Failed to fetch student information');
+      return;
+    }
+
+    const student = await studentInfoResponse.json();
+
+    // Now fetch grades using the actual student ID
+    const response = await fetch(`/grades/${student.id}`, {
       credentials: 'include'
     });
 
@@ -218,7 +241,7 @@ async function downloadGradeReport() {
 
     csvContent += 'Student Grade Report\n';
     csvContent += `Student Name,${document.getElementById('studentName').textContent}\n`;
-    csvContent += `Student ID,${currentUserId}\n`;
+    csvContent += `Student ID,${student.id}\n`;
     csvContent += `Generated Date,${new Date().toLocaleDateString()}\n\n`;
 
     csvContent += 'Subject,Letter Grade,Score,Status\n';

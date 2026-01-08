@@ -497,6 +497,28 @@ app.delete('/grades/:studentId/:subjectId', requireTeacher, async (req, res) => 
   }
 });
 
+// Get student's own info (for student users)
+app.get('/api/my-student-info', requireStudent, async (req, res) => {
+  try {
+    console.log(`👤 Student fetching their own info for user ID: ${req.session.userId}`);
+    const studentInfo = await Database.getStudentByUserId(req.session.userId);
+    if (!studentInfo) {
+      return res.status(404).json({
+        error: 'Student not found',
+        message: 'No student record found for this user'
+      });
+    }
+    console.log(`✅ Student info fetched for user ${req.session.userId}`);
+    res.json(studentInfo);
+  } catch (error) {
+    console.error('❌ Error fetching student info:', error.message);
+    res.status(500).json({
+      error: 'Failed to fetch student info',
+      message: error.message
+    });
+  }
+});
+
 // Get student's own grades (for student users)
 app.get('/my-grades/:studentId', requireStudent, async (req, res) => {
   try {

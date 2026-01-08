@@ -223,7 +223,7 @@ ALTER TABLE `sections`
 -- AUTO_INCREMENT for table `student_grades`
 --
 ALTER TABLE `student_grades`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
 
 --
 -- AUTO_INCREMENT for table `students`
@@ -241,7 +241,7 @@ ALTER TABLE `subjects`
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- Constraints for dumped tables
@@ -274,12 +274,15 @@ ALTER TABLE `subjects`
   ADD CONSTRAINT `subjects_ibfk_1` FOREIGN KEY (`teacher_id`) REFERENCES `users` (`id`) ON DELETE SET NULL;
 
 --
--- Dumping data for table `custom_inputs`
+-- Dumping data for table `users`
 --
 
-INSERT INTO `custom_inputs` (`id`, `name`, `type`, `weight`, `created_at`) VALUES
-(1, 'Quiz 3', 'score', 0.0500, '2024-12-19 09:30:00'),
-(2, 'Seatwork 1', 'percentage', 0.0300, '2024-12-19 09:30:00');
+INSERT INTO `users` (`id`, `username`, `password`, `email`, `full_name`, `role`, `created_at`, `last_login`) VALUES
+(1, 'admin', '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'admin@school.com', 'Administrator', 'admin', '2024-12-19 09:30:00', NULL),
+(2, 'teacher1', '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'teacher@school.com', 'Teacher One', 'teacher', '2024-12-19 09:30:00', NULL),
+(3, 'student1', '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'student1@school.com', 'Rey Mark Malabarbas', 'student', '2024-12-19 09:30:00', NULL),
+(4, 'student2', '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'student2@school.com', 'Maria Santos', 'student', '2024-12-19 09:30:00', NULL),
+(5, 'student3', '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'student3@school.com', 'John Doe', 'student', '2024-12-19 09:30:00', NULL);
 
 --
 -- Dumping data for table `sections`
@@ -293,18 +296,46 @@ INSERT INTO `sections` (`id`, `name`, `created_at`) VALUES
 -- Dumping data for table `students`
 --
 
-INSERT INTO `students` (`id`, `name`, `section_id`, `created_at`) VALUES
-(1, 'Rey Mark Malabarbas', 1, '2024-12-19 09:30:00'),
-(2, 'Maria Santos', 1, '2024-12-19 09:30:00'),
-(3, 'John Doe', 2, '2024-12-19 09:30:00');
+INSERT INTO `students` (`id`, `name`, `section_id`, `user_id`, `created_at`) VALUES
+(1, 'Rey Mark Malabarbas', 1, 3, '2024-12-19 09:30:00'),
+(2, 'Maria Santos', 1, 4, '2024-12-19 09:30:00'),
+(3, 'John Doe', 2, 5, '2024-12-19 09:30:00');
 
 --
--- Dumping data for table `users`
+-- Dumping data for table `subjects`
 --
 
-INSERT INTO `users` (`id`, `username`, `password`, `email`, `full_name`, `role`, `created_at`, `last_login`) VALUES
-(1, 'admin', '$2a$10$kZXz9Y8fWx8P.0qJ8L5q9.xJZ7qH0vN4P5N0J5K8L7M9Q0R1S2T3U4', 'admin@school.com', 'Administrator', 'admin', '2024-12-19 09:30:00', NULL),
-(2, 'teacher1', '$2a$10$kZXz9Y8fWx8P.0qJ8L5q9.xJZ7qH0vN4P5N0J5K8L7M9Q0R1S2T3U4', 'teacher@school.com', 'Teacher One', 'teacher', '2024-12-19 09:30:00', NULL);
+INSERT INTO `subjects` (`id`, `name`, `teacher_id`, `created_at`) VALUES
+(1, 'Mathematics', 2, '2024-12-19 09:30:00'),
+(2, 'Science', 2, '2024-12-19 09:30:00'),
+(3, 'English', 2, '2024-12-19 09:30:00'),
+(4, 'History', 2, '2024-12-19 09:30:00');
+
+--
+-- Dumping data for table `custom_inputs`
+--
+
+INSERT INTO `custom_inputs` (`id`, `name`, `type`, `weight`, `created_at`) VALUES
+(1, 'Quiz 3', 'score', 0.0500, '2024-12-19 09:30:00'),
+(2, 'Seatwork 1', 'percentage', 0.0300, '2024-12-19 09:30:00');
+
+--
+-- Dumping data for table `student_grades`
+--
+
+INSERT INTO `student_grades` (`id`, `student_id`, `subject_id`, `class_participation`, `attendance`, `quiz1_score`, `quiz1_total`, `quiz2_score`, `quiz2_total`, `final_exam_score`, `final_exam_total`, `lab_grade`, `final_grade`, `letter_grade`, `status`, `created_at`, `updated_at`) VALUES
+(1, 1, 1, 85.00, 90.00, 80.00, 100.00, 85.00, 100.00, 88.00, 100.00, 82.00, 85.50, 'B', 'completed', '2024-12-19 09:30:00', '2024-12-19 09:30:00'),
+(2, 1, 2, 88.00, 92.00, 90.00, 100.00, 87.00, 100.00, 91.00, 100.00, 85.00, 89.20, 'A-', 'completed', '2024-12-19 09:30:00', '2024-12-19 09:30:00'),
+(3, 1, 3, 82.00, 88.00, 75.00, 100.00, 80.00, 100.00, 82.00, 100.00, 78.00, 81.40, 'B-', 'completed', '2024-12-19 09:30:00', '2024-12-19 09:30:00'),
+(4, 1, 4, 90.00, 95.00, 92.00, 100.00, 88.00, 100.00, 95.00, 100.00, 90.00, 92.80, 'A-', 'completed', '2024-12-19 09:30:00', '2024-12-19 09:30:00'),
+(5, 2, 1, 78.00, 85.00, 70.00, 100.00, 75.00, 100.00, 76.00, 100.00, 74.00, 76.20, 'C+', 'completed', '2024-12-19 09:30:00', '2024-12-19 09:30:00'),
+(6, 2, 2, 85.00, 90.00, 82.00, 100.00, 80.00, 100.00, 84.00, 100.00, 81.00, 83.60, 'B', 'completed', '2024-12-19 09:30:00', '2024-12-19 09:30:00'),
+(7, 2, 3, 80.00, 87.00, 78.00, 100.00, 82.00, 100.00, 80.00, 100.00, 79.00, 80.80, 'B-', 'completed', '2024-12-19 09:30:00', '2024-12-19 09:30:00'),
+(8, 2, 4, 88.00, 92.00, 85.00, 100.00, 90.00, 100.00, 87.00, 100.00, 86.00, 87.60, 'B+', 'completed', '2024-12-19 09:30:00', '2024-12-19 09:30:00'),
+(9, 3, 1, 92.00, 96.00, 95.00, 100.00, 93.00, 100.00, 97.00, 100.00, 94.00, 95.20, 'A', 'completed', '2024-12-19 09:30:00', '2024-12-19 09:30:00'),
+(10, 3, 2, 89.00, 93.00, 88.00, 100.00, 91.00, 100.00, 90.00, 100.00, 89.00, 90.00, 'A-', 'completed', '2024-12-19 09:30:00', '2024-12-19 09:30:00'),
+(11, 3, 3, 91.00, 94.00, 89.00, 100.00, 92.00, 100.00, 93.00, 100.00, 91.00, 91.80, 'A-', 'completed', '2024-12-19 09:30:00', '2024-12-19 09:30:00'),
+(12, 3, 4, 94.00, 97.00, 96.00, 100.00, 95.00, 100.00, 98.00, 100.00, 96.00, 96.20, 'A', 'completed', '2024-12-19 09:30:00', '2024-12-19 09:30:00');
 
 COMMIT;
 

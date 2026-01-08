@@ -261,8 +261,10 @@ async function createTables(connection) {
         id INT AUTO_INCREMENT PRIMARY KEY,
         name VARCHAR(255) NOT NULL,
         section_id INT NOT NULL,
+        user_id INT DEFAULT NULL,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        FOREIGN KEY (section_id) REFERENCES sections(id) ON DELETE CASCADE
+        FOREIGN KEY (section_id) REFERENCES sections(id) ON DELETE CASCADE,
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
       ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`,
       
       // Custom inputs table
@@ -623,10 +625,16 @@ class Database {
         ORDER BY s.name
       `, [studentId]);
 
-      // Group grades by subject_id
+      // Group grades by subject_id and map field names for frontend compatibility
       const gradesBySubject = {};
       gradeRows.forEach(grade => {
-        gradesBySubject[grade.subject_id] = grade;
+        // Map database field names to frontend expected names
+        const mappedGrade = {
+          ...grade,
+          lab_score: grade.lab_grade || 0, // Lab grade is stored as percentage (0-100)
+          lab_total: 100 // Lab is stored as percentage, so total is always 100
+        };
+        gradesBySubject[grade.subject_id] = mappedGrade;
       });
 
       const [customRows] = await pool.execute(`
