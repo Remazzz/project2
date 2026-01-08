@@ -1,9 +1,5 @@
-let currentUserId = null;
-let currentUserRole = null;
-
 document.addEventListener('DOMContentLoaded', () => {
   initializeTheme();
-  initializeSubjects();
   setupEventListeners();
 });
 
@@ -12,35 +8,8 @@ function initializeTheme() {
   document.documentElement.setAttribute('data-theme', savedTheme);
 }
 
-async function initializeSubjects() {
-  try {
-    const response = await fetch('/subjects', {
-      credentials: 'include'
-    });
-    if (response.ok) {
-      subjects = await response.json();
-      console.log('Subjects loaded:', subjects);
-    } else {
-      console.error('Failed to load subjects');
-      // Fallback to default subjects
-      subjects = [
-        { id: 1, name: 'Mathematics' },
-        { id: 2, name: 'Science' },
-        { id: 3, name: 'English' },
-        { id: 4, name: 'History' }
-      ];
-    }
-  } catch (error) {
-    console.error('Error loading subjects:', error);
-    // Fallback to default subjects
-    subjects = [
-      { id: 1, name: 'Mathematics' },
-      { id: 2, name: 'Science' },
-      { id: 3, name: 'English' },
-      { id: 4, name: 'History' }
-    ];
-  }
-}
+// Students don't need to load subjects list - they only see their own grades
+// Subjects are handled in the grades data response
 
 function setupEventListeners() {
   const themeToggle = document.getElementById('themeToggle');
@@ -133,7 +102,7 @@ function updateStudentInfo(student) {
   if (idEl) idEl.textContent = `ID: ${student.id || 'N/A'}`;
 
   if (sectionEl) {
-    const sectionName = student.section_name || student.sectionId || 'N/A';
+    const sectionName = student.section_name || 'N/A';
     sectionEl.textContent = `Section: ${sectionName}`;
   }
 

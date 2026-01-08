@@ -503,10 +503,27 @@ app.get('/api/my-student-info', requireStudent, async (req, res) => {
     console.log(`👤 Student fetching their own info for user ID: ${req.session.userId}`);
     const studentInfo = await Database.getStudentByUserId(req.session.userId);
     if (!studentInfo) {
-      return res.status(404).json({
-        error: 'Student not found',
-        message: 'No student record found for this user'
-      });
+      // Create the student record if not found
+      try {
+        await Database.createStudentForUser(req.session.userId, req.session.fullName);
+        // Fetch again
+        const newStudentInfo = await Database.getStudentByUserId(req.session.userId);
+        if (!newStudentInfo) {
+          return res.status(404).json({
+            error: 'Student not found',
+            message: 'Failed to create student record'
+          });
+        }
+        console.log(`✅ Student record created and fetched for user ${req.session.userId}`);
+        res.json(newStudentInfo);
+        return;
+      } catch (createError) {
+        console.error('❌ Error creating student record:', createError.message);
+        return res.status(500).json({
+          error: 'Failed to create student record',
+          message: createError.message
+        });
+      }
     }
     console.log(`✅ Student info fetched for user ${req.session.userId}`);
     res.json(studentInfo);

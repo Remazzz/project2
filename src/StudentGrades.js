@@ -3,8 +3,6 @@ let currentSelectedStudent = null;
 
 document.addEventListener('DOMContentLoaded', () => {
   initializeTheme();
-  initializeSubjects();
-  initializeStudentView();
   setupEventListeners();
 });
 

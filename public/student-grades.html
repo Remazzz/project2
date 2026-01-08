@@ -144,7 +144,10 @@
         }
       } else {
         // Teachers and admins can see the selector and back button
-        // Load student list for selection
+        // Load subjects and student list for selection
+        if (typeof initializeSubjects === 'function') {
+          initializeSubjects();
+        }
         if (typeof initializeStudentView === 'function') {
           initializeStudentView();
         }
