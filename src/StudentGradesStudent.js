@@ -1,30 +1,7 @@
-document.addEventListener('DOMContentLoaded', () => {
-  initializeTheme();
-  setupEventListeners();
-});
-
-function initializeTheme() {
-  const savedTheme = localStorage.getItem('theme') || 'light';
-  document.documentElement.setAttribute('data-theme', savedTheme);
-}
-
 // Students don't need to load subjects list - they only see their own grades
 // Subjects are handled in the grades data response
 
 function setupEventListeners() {
-  const themeToggle = document.getElementById('themeToggle');
-  if (themeToggle) {
-    themeToggle.addEventListener('click', toggleTheme);
-  }
-
-  const logoutBtn = document.getElementById('logoutBtn');
-  if (logoutBtn) {
-    logoutBtn.addEventListener('click', () => {
-      alert('Logged out successfully');
-      window.location.href = 'login.html';
-    });
-  }
-
   const downloadBtn = document.getElementById('downloadBtn');
   if (downloadBtn) {
     downloadBtn.addEventListener('click', downloadGradeReport);

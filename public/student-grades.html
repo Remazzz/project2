@@ -138,9 +138,19 @@
           backToEditBtn.style.display = 'none';
         }
 
+        // Load subjects for students (needed for download functionality)
+        if (typeof initializeSubjects === 'function') {
+          initializeSubjects();
+        }
+
         // Automatically load student's own grades
         if (typeof loadStudentGrades === 'function') {
           loadStudentGrades(currentUserId);
+        }
+
+        // Setup event listeners for students (download button)
+        if (typeof setupEventListeners === 'function') {
+          setupEventListeners();
         }
       } else {
         // Teachers and admins can see the selector and back button
@@ -150,6 +160,12 @@
         }
         if (typeof initializeStudentView === 'function') {
           initializeStudentView();
+        }
+
+        // Setup download button for teachers/admins
+        const downloadBtn = document.getElementById('downloadBtn');
+        if (downloadBtn && typeof downloadGradeReport === 'function') {
+          downloadBtn.addEventListener('click', downloadGradeReport);
         }
       }
     }
