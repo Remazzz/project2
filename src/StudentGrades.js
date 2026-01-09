@@ -241,7 +241,9 @@ function getSubjectName(subjectId) {
 
 async function downloadGradeReport() {
   if (!currentSelectedStudent) {
-    alert('Please select a student first');
+    if (window.currentUserRole !== 'student') {
+      alert('Please select a student first');
+    }
     return;
   }
 

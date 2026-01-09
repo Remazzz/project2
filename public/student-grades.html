@@ -96,6 +96,7 @@
         } else {
           currentUserRole = data.user.role;
           currentUserId = data.user.id;
+          window.currentUserRole = data.user.role;
 
           // Load appropriate script based on user role, then setup UI
           await loadRoleBasedScript(data.user.role);

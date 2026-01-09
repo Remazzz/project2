@@ -501,7 +501,9 @@ function removeCustomInput(inputId) {
 
 function calculateGrade() {
   if (!currentStudentId) {
-    alert('Please select a student first');
+    if (window.currentUserRole !== 'student') {
+      alert('Please select a student first');
+    }
     return;
   }
 
@@ -548,7 +550,9 @@ function calculateGrade() {
 
 async function saveGrade() {
   if (!currentStudentId) {
-    alert('Please select a student first');
+    if (window.currentUserRole !== 'student') {
+      alert('Please select a student first');
+    }
     return;
   }
 
@@ -623,7 +627,9 @@ async function saveGrade() {
 
 async function deleteGrade() {
   if (!currentStudentId) {
-    alert('Please select a student first');
+    if (window.currentUserRole !== 'student') {
+      alert('Please select a student first');
+    }
     return;
   }
 
