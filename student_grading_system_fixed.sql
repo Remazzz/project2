@@ -280,11 +280,10 @@ ALTER TABLE `subjects`
 --
 
 INSERT INTO `users` (`id`, `username`, `password`, `email`, `full_name`, `role`, `created_at`, `last_login`) VALUES
-(1, 'admin', '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'admin@school.com', 'Administrator', 'admin', '2024-12-19 09:30:00', NULL),
-(2, 'teacher1', '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'teacher@school.com', 'Teacher One', 'teacher', '2024-12-19 09:30:00', NULL),
-(3, 'student1', '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'student1@school.com', 'Rey Mark Malabarbas', 'student', '2024-12-19 09:30:00', NULL),
-(4, 'student2', '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'student2@school.com', 'Maria Santos', 'student', '2024-12-19 09:30:00', NULL),
-(5, 'student3', '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'student3@school.com', 'John Doe', 'student', '2024-12-19 09:30:00', NULL);
+(1, 'teacher1', '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'teacher@school.com', 'Teacher One', 'teacher', '2024-12-19 09:30:00', NULL),
+(2, 'student1', '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'student1@school.com', 'Rey Mark Malabarbas', 'student', '2024-12-19 09:30:00', NULL),
+(3, 'student2', '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'student2@school.com', 'Maria Santos', 'student', '2024-12-19 09:30:00', NULL),
+(4, 'student3', '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'student3@school.com', 'John Doe', 'student', '2024-12-19 09:30:00', NULL);
 
 --
 -- Dumping data for table `sections`
@@ -308,15 +307,15 @@ INSERT INTO `students` (`id`, `name`, `section_id`, `user_id`, `created_at`) VAL
 --
 
 INSERT INTO `subjects` (`id`, `name`, `teacher_id`, `created_at`) VALUES
-(1, 'Mathematics', 2, '2024-12-19 09:30:00'),
-(2, 'Science', 2, '2024-12-19 09:30:00'),
-(3, 'English', 2, '2024-12-19 09:30:00'),
-(4, 'Filipino', 2, '2024-12-19 09:30:00'),
-(5, 'Araling Panlipunan', 2, '2024-12-19 09:30:00'),
-(6, 'ESP', 2, '2024-12-19 09:30:00'),
-(7, 'MAPEH', 2, '2024-12-19 09:30:00'),
-(8, 'TVE', 2, '2024-12-19 09:30:00'),
-(9, 'Business Math', 2, '2024-12-19 09:30:00');
+(1, 'Mathematics', 1, '2024-12-19 09:30:00'),
+(2, 'Science', 1, '2024-12-19 09:30:00'),
+(3, 'English', 1, '2024-12-19 09:30:00'),
+(4, 'Filipino', 1, '2024-12-19 09:30:00'),
+(5, 'Araling Panlipunan', 1, '2024-12-19 09:30:00'),
+(6, 'ESP', 1, '2024-12-19 09:30:00'),
+(7, 'MAPEH', 1, '2024-12-19 09:30:00'),
+(8, 'TVE', 1, '2024-12-19 09:30:00'),
+(9, 'Business Math', 1, '2024-12-19 09:30:00');
 
 --
 -- Dumping data for table `custom_inputs`
