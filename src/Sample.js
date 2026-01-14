@@ -531,14 +531,50 @@ function calculateGrade() {
   const labTotal = parseFloat(document.getElementById('labTotal')?.value) || 1;
   const labPercentage = labTotal === 0 ? 0 : (labScore / labTotal) * 100;
 
-  const grade = (
-    (classParticipation * 0.40) +
-    (attendance * 0.10) +
-    (quiz1Percentage * 0.15) +
-    (quiz2Percentage * 0.15) +
-    (finalExamPercentage * 0.10) +
-    (labPercentage * 0.10)
-  );
+  let grade;
+
+  // Determine grading formula based on subject
+  if ([3, 4, 5, 6].includes(currentSubjectId)) {
+    // Formula 1: English, Filipino, Araling Panlipunan, ESP
+    grade = (
+      (classParticipation * 0.40) +
+      (attendance * 0.10) +
+      (quiz1Percentage * 0.15) +
+      (quiz2Percentage * 0.15) +
+      (finalExamPercentage * 0.10) +
+      (labPercentage * 0.10)
+    );
+  } else if ([1, 2].includes(currentSubjectId)) {
+    // Formula 2: Mathematics, Science
+    grade = (
+      (classParticipation * 0.30) +
+      (attendance * 0.10) +
+      (quiz1Percentage * 0.20) +
+      (quiz2Percentage * 0.20) +
+      (finalExamPercentage * 0.10) +
+      (labPercentage * 0.10)
+    );
+  } else if ([7, 8].includes(currentSubjectId)) {
+    // Formula 3: MAPEH, TVE
+    grade = (
+      (classParticipation * 0.10) +
+      (attendance * 0.10) +
+      (quiz1Percentage * 0.30) +
+      (quiz2Percentage * 0.30) +
+      (finalExamPercentage * 0.10) +
+      (labPercentage * 0.10)
+    );
+  } else {
+    // Default formula for any other subjects
+    grade = (
+      (classParticipation * 0.40) +
+      (attendance * 0.10) +
+      (quiz1Percentage * 0.15) +
+      (quiz2Percentage * 0.15) +
+      (finalExamPercentage * 0.10) +
+      (labPercentage * 0.10)
+    );
+  }
 
   const roundedGrade = Math.round(grade * 100) / 100;
 
